@@ -5,7 +5,7 @@ Factorio 风格的科技树模组（**NeoForge 1.21.1**）：**配方被科技�
 
 > 关于这个项目的来历：作者 **Black8Ball** 闲来无事，把想法丢给 DeepSeek（AI）说「给我做个 Factorio 风格的研究树模组」，
 > 需求、方向、验收、贴图取舍由作者拍板，代码、研究树生成脚本、可视化编辑器与文档由 AI 写出来。详见文末「关于这个项目」。
-
+连这个仓库也是我让DS帮我推的
 ## 已实现功能
 
 | 功能 | 说明 |
@@ -335,7 +335,8 @@ stationAllowedItems = [
 
 ## 科技包与酿造台锁（v1.12）
 
-六种科技包（只改了显示名，物品 id 不变）：
+科技瓶配方大部分都比较弱智，但我没什么时间改了-2026.11.1
+六种科技包：
 
 | 物品 id | 显示名 | 配方（对应研究未完成时锁住） |
 | --- | --- | --- |
@@ -726,57 +727,11 @@ gradle build --console=plain --no-daemon -Dnet.minecraftforge.gradle.check.certs
 产物：`build/libs/sciencepacks-1.0.0-1.21.neo.jar`（229026 字节，SHA256 `451A29CE84E202C80C528C274E781ADBEBB6628D5EE4F46684C2339D75AEF32F`）。
 注意 `-Dnet.minecraftforge.gradle.check.certs=false` 仍要带（ModDevGradle 复用同一套环境检查逻辑，缺它会在启动时连外网卡住）。
 
-### 移植要点（与 Forge 版的差异）
 
-| 项目 | Forge 1.21.1 | NeoForge 1.21.1 |
-| --- | --- | --- |
-| 网络 | `SimpleChannel` + `CustomPayloadEvent` | `RegisterPayloadHandlersEvent` + `CustomPacketPayload`/`StreamCodec`，发送用 `PacketDistributor.sendToServer/sendToPlayer` |
-| 注册表 | `DeferredRegister` + `RegistryObject` | `DeferredRegister` + `DeferredHolder`，查询用 `BuiltInRegistries.X.get(...)` |
-| 菜单界面 | 反射 `MenuScreens.register` | `RegisterMenuScreensEvent#register`（`ScreenRegistrar` 已删除） |
-| 配置 | `ForgeConfigSpec` | `ModConfigSpec`（`net.neoforged.neoforge.common.ModConfigSpec`） |
-| 能力 | `ICapabilityProvider`/`getCapability` | `RegisterCapabilitiesEvent` + `InvWrapper` |
-| 事件 | `MinecraftForge.EVENT_BUS`、`TickEvent` | `NeoForge.EVENT_BUS`、`ServerTickEvent.Post`/`ClientTickEvent.Post` |
-| mixin 目标 | SRG 名（`m_150546_`） | Mojang 官方名 + `remap=false`（7 个 mixin 已按 1.21.1 签名重写） |
-| 元数据 | `META-INF/mods.toml` | `META-INF/neoforge.mods.toml`（旧文件已删除，避免重复） |
-
-### 安装到 PCL2（真实游戏，非开发环境）
-
-由于安装器默认连 `maven.neoforged.net` 会超时，本机是手工装好的：
-
-1. 版本目录 `D:\PCL2\.minecraft\versions\neoforge-21.1.80\`：`neoforge-21.1.80.json`（`inheritsFrom=1.21.1`）、`neoforge-21.1.80.jar`、`mods\sciencepacks-1.0.0-1.21.neo.jar`。
-2. `D:\PCL2\.minecraft\libraries\` 下按 json 补齐 25 个库里缺失的文件（从 Gradle 缓存复制）。
-3. `D:\PCL2\.minecraft\libraries\net\neoforged\neoforge\21.1.80\neoforge-21.1.80-universal.jar`（3008995 字节，forgecdn 下载）。
-4. PCL2 里选版本 **neoforge-21.1.80** 启动；进入世界后用研究台、按 K 打开研究树。
-
-### 验证记录
-
-- 服务端：`Science Packs payload handlers registered (version 1)`、`Loaded 36 technologies (189 locked recipes)`、mixin 无报错。
-- 数据包：36 个科技 JSON 通过 `gen-tree.js` 校验（物品 id 合法、解锁无重复、前置齐全、坐标无冲突）；6 个科技包配方在 `data/sciencepacks/recipe/`。
-- 工具：`tools/tech-editor.html`（研究树编辑器）、`gen-tree.js`、`gen-recipes.js`、`md-tree.js` 均已同步到本工程。
-
-### 已知限制
-
-- `gradle runClient` 在开发环境可跑，但真实验证请用上面的 PCL2 实例（用户要求）。
-- 换 jar 前必须完全退出游戏，否则资源包/数据包读不到（紫黑块、原始键名）。
-### 部署目标（2025-11-01 起）
-
-后续 mod 一律同步到 PCL2 实际使用的版本目录：
-
-`D:\PCL2\.minecraft\versions\1.21.1-NeoForge_21.1.265\mods\`
-
-- 该版本是完整安装（NeoForge 21.1.265 + 1.21.1 客户端），与本模组 `neoforge.mods.toml` 的依赖 `[21.1.80,)` 兼容。
-- 工程内 `tools/deploy.ps1` 会把 jar 同时复制到上面的目录和 `E:\DeepSeek文件\我的世界Mod\03-交付产物\`；**检测到游戏在运行时会拒绝覆盖**（`-Force` 可强制）。
-- 系统默认禁止运行 ps1 脚本时，这样调用：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File tools\deploy.ps1
-```
-
-- 之前手工搭建的 `neoforge-21.1.80` 目录只作备用，不再作为部署目标。
 
 ## 模组联动（v3.1）
 
-本模组支持「装了别的模组才出现的研究树」和「装了就替换本模组配方」两套联动机制，全部用数据文件描述，不需要写 Java。
+不存在，但是我让DS写了一些自以为是的功能
 
 ### 1. 按模组启用研究：`requiredMods`
 
@@ -844,16 +799,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File tools\deploy.ps1
 参数：`-Root`（工程根）、`-ClientJar`（默认 `D:\PCL2\.minecraft\versions\1.21.1\1.21.1.jar`）、`-ModsDir`（默认 `1.21.1-NeoForge_21.1.265\mods`）。
 当前导出结果：索引 6 个 jar、4422 张纹理、1369 个物品 id，写入 **862** 个图标；其余（方块物品、动态生成图标）编辑器回退为文字标签。
 
-## v3.6 界面提示精简 + 编辑器「多方块结构」说明
 
-- 游戏内不再显示说明性文字：研究详情悬停多方块结构时的「大图标 + 右下角小角标 = 需要研究后才能搭建或使用的多方块结构」「图标组合：…」两行，以及研究界面底部那行操作提示，都已删除。
-- 这些说明搬进了 `tools/tech-editor.html`：「多方块结构」输入框下方有一整段说明（含义、游戏内图标语义、写法 `核心id|大图标物品|显示名称|小角标物品`），并带**实时外观预览** —— 每个结构显示大图标 + 右下角角标 + 名称，和游戏里效果栏的画法一致。
-- 预览按代码里的默认规则补全：下界传送门→黑曜石+打火石、末地传送门→末地传送门框架+末影之眼、凋灵→凋灵骷髅头+灵魂沙、铁傀儡→南瓜+铁块、雪傀儡→南瓜+雪块；维度/实体/放置类结构也有各自默认图标。- **修了一个「怎么改都不生效」的坑**：以前首次启动会写一份「示例覆盖」到 `config/sciencepacks-research.json`，里面真的把 `stone_age` 覆盖了一次（触发改成圆石×32），于是之后无论改数据包还是编辑器导出，游戏里都还是旧样子。现在这个文件只生成**空模板**（`technologies: []`），并会自动把旧版那段示例覆盖替换掉；日志里会显示「配置文件研究树：覆盖 0 项」。
 
-## v3.5 研究树节点：更大的图标 + 名字
-
-- 节点图标从固定的 16px 放大到节点宽度的 **62%**，放在节点偏上位置；缩放到节点宽度 ≥ 40px 时，图标下方会显示研究名字（自动截断到节点宽度）。
-- 也就是说：默认缩放看图标，放大后同时能看到名字，观感接近编辑器里的节点。
 
 ## v3.4 关联模式的分层布局
 
@@ -912,6 +859,7 @@ node tools\validate-tree.js
 - 作者 / 仓库所有者：**Black8Ball**。
 - 这个模组是作者闲来无事，让 **DeepSeek（AI 助手）** 从零写出来的：需求、方向、验收、贴图与美术取舍由作者拍板；Java 代码、研究树 JSON、生成脚本（`tools/gen-tree.js` / `gen-recipes.js`）、可视化编辑器（`tools/tech-editor.html`）与文档由 AI 产出，作者试用后反馈问题、AI 迭代修复。
 - 起因很简单：作者想要一个「Factorio 风格的科技树 + 科技包解锁」模组，于是把它们交给 AI 跑了一遍。整个过程中没有手写代码。
+以下是我人手扣键盘写的:我没朋友，有些东西没有经过多人测试，我不知道有没有人愿意下这个，但还是希望有人能多人测试一下，再次重申:这个模组完全是我闲来无事浪费钱跑的！我希望有一个真正的factorio风格的科技瓶模组并有人做一个整合包，所以我搁这许愿呢。
 
 ## 开源协议
 
