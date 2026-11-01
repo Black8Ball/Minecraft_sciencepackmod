@@ -1,0 +1,47 @@
+{
+  "name": "终极研究 II：触及距离",
+  "description": "无限研究",
+  "icon": "minecraft:ender_pearl",
+  "category": "endgame",
+  "x": 3,
+  "y": 3,
+  "researchTime": 120,
+  "rounds": 5,
+  "infinite": true,
+  "prerequisites": [
+    "sciencepacks:yellow_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 10
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 8
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 8
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 5
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 8
+    },
+    {
+      "item": "sciencepacks:pack_yellow",
+      "count": 8
+    }
+  ],
+  "effects": [
+    {
+      "type": "reach",
+      "amount": 1
+    }
+  ],
+  "showWhen": []
+}

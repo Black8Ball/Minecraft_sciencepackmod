@@ -1,0 +1,29 @@
+{
+  "name": "军工学 II",
+  "description": "远程武器，你总是需要这个",
+  "icon": "minecraft:bow",
+  "category": "military",
+  "x": 5,
+  "y": -6,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:military_1"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:bow",
+    "minecraft:arrow",
+    "minecraft:crossbow",
+    "minecraft:tipped_arrow",
+    "minecraft:spectral_arrow"
+  ]
+}

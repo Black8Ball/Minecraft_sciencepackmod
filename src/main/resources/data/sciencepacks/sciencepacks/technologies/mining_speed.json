@@ -1,0 +1,46 @@
+{
+  "name": "终极研究 I：挖掘效率",
+  "description": "无限研究",
+  "icon": "minecraft:iron_pickaxe",
+  "category": "endgame",
+  "x": 5,
+  "y": 3,
+  "researchTime": 120,
+  "rounds": 5,
+  "infinite": true,
+  "prerequisites": [
+    "sciencepacks:yellow_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 8
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 6
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 6
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 4
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 6
+    },
+    {
+      "item": "sciencepacks:pack_yellow",
+      "count": 6
+    }
+  ],
+  "effects": [
+    {
+      "type": "mining_speed",
+      "amount": 0.15
+    }
+  ]
+}

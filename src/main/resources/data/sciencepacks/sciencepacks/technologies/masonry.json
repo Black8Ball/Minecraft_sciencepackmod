@@ -1,0 +1,25 @@
+{
+  "name": "石作",
+  "description": "石砖在锤下咬合，砂浆填平最后一处缝隙。洞窟开始有墙、有门、有街。",
+  "icon": "minecraft:stone_bricks",
+  "category": "building",
+  "x": 3,
+  "y": -8,
+  "rounds": 10,
+  "prerequisites": [
+    "sciencepacks:red_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:bricks",
+    "minecraft:stone_bricks",
+    "minecraft:stone_brick_stairs",
+    "minecraft:mossy_stone_bricks",
+    "minecraft:smooth_stone"
+  ]
+}

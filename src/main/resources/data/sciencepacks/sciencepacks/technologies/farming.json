@@ -1,0 +1,24 @@
+{
+  "name": "耕作",
+  "description": "有人在洞穴口种下第一排小麦。石磨与木犁都不值钱，但它们让「明天」有了着落。",
+  "icon": "minecraft:bread",
+  "category": "material",
+  "x": -3,
+  "y": -9,
+  "rounds": 1,
+  "prerequisites": [
+    "sciencepacks:stone_age"
+  ],
+  "cost": [],
+  "unlocks": [
+    "minecraft:bread",
+    "minecraft:hay_block",
+    "minecraft:sugar",
+    "minecraft:composter",
+    "minecraft:carved_pumpkin",
+    "minecraft:jack_o_lantern"
+  ],
+  "triggers": [
+    "item:minecraft:wheat_seeds*16"
+  ]
+}

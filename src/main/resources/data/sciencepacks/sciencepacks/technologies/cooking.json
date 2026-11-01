@@ -1,0 +1,28 @@
+{
+  "name": "烹饪",
+  "description": "蛋糕、炖菜与南瓜派摆上长桌。矿洞里第一次有了节日的味道。",
+  "icon": "minecraft:cake",
+  "category": "material",
+  "x": -4,
+  "y": -8,
+  "rounds": 12,
+  "prerequisites": [
+    "sciencepacks:farming",
+    "sciencepacks:red_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:cookie",
+    "minecraft:cake",
+    "minecraft:pumpkin_pie",
+    "minecraft:mushroom_stew",
+    "minecraft:rabbit_stew",
+    "minecraft:beetroot_soup",
+    "minecraft:golden_carrot"
+  ]
+}

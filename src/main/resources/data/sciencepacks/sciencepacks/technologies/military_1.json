@@ -1,0 +1,31 @@
+{
+  "name": "军工学 I",
+  "description": "史上性价比最高的护甲就此诞生，还附赠铁剑木盾一套",
+  "icon": "minecraft:iron_sword",
+  "category": "military",
+  "x": 5,
+  "y": -7,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:gray_science",
+    "sciencepacks:new_tech"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:iron_sword",
+    "minecraft:iron_helmet",
+    "minecraft:iron_chestplate",
+    "minecraft:iron_leggings",
+    "minecraft:iron_boots",
+    "minecraft:shield"
+  ]
+}

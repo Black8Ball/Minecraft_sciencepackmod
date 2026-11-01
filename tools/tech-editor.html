@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>科技瓶 · 科技树编辑器</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: #15151a; color: #e6e6e6; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 10px 14px; background: #1e1e24; border-bottom: 1px solid #3d3d48; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  header h1 { font-size: 15px; margin: 0 14px 0 0; font-weight: 600; }
+  button { background: #35353d; color: #e6e6e6; border: 1px solid #4a4a56; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  button:hover { background: #45454f; }
+  button.primary { background: #2f6b3a; border-color: #3e8e41; }
+  button.primary:hover { background: #3a8147; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #canvasWrap { flex: 1; position: relative; overflow: hidden; background: #141418; }
+  canvas { display: block; cursor: grab; }
+  canvas.dragging { cursor: grabbing; }
+  #side { width: 340px; border-left: 1px solid #3d3d48; background: #1e1e24; padding: 12px; overflow-y: auto; }
+  #side h2 { font-size: 13px; margin: 0 0 10px; color: #e8b44a; font-weight: 600; }
+  label { display: block; font-size: 12px; color: #9a9aa6; margin: 10px 0 3px; }
+  input, textarea, select { width: 100%; background: #141418; color: #e6e6e6; border: 1px solid #3d3d48; border-radius: 4px; padding: 5px 7px; font-size: 12px; font-family: inherit; }
+  textarea { resize: vertical; min-height: 54px; }
+  .row { display: flex; gap: 8px; align-items: stretch; }
+  .row > div { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+  .row > div > label { margin-top: 0; }
+  .cost-row { display: grid; grid-template-columns: 1fr 54px 24px; gap: 4px; margin-bottom: 4px; align-items: center; }
+  .cost-row button { padding: 2px 6px; font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 120px; overflow-y: auto; border: 1px solid #3d3d48; border-radius: 4px; padding: 6px; }
+  .chip { font-size: 11px; padding: 3px 7px; border-radius: 10px; background: #2a2a32; border: 1px solid #3d3d48; cursor: pointer; user-select: none; }
+  .chip.on { background: #2f6b3a; border-color: #3e8e41; }
+  .chip.hit { border-color: #e8b44a; }
+  .quick { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+  .quick button { padding: 3px 8px; font-size: 11px; }
+  /* 标题旁的 ? 简介气泡 */
+  .q { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; border: 1px solid #55555f; color: #9a9aa6; font-size: 10px; line-height: 1; cursor: help; margin-left: 5px; user-select: none; vertical-align: 1px; }
+  .q:hover { border-color: #e8b44a; color: #e8b44a; }
+  #tip { position: fixed; z-index: 120; max-width: 300px; background: #24242c; color: #dcdce4; border: 1px solid #4a4a56; border-radius: 5px; padding: 7px 10px; font-size: 11.5px; line-height: 1.7; display: none; box-shadow: 0 6px 18px rgba(0,0,0,.55); pointer-events: none; }
+  /* 行内自动补全浮层 */
+  #suggest { position: fixed; z-index: 80; min-width: 200px; max-height: 210px; overflow-y: auto; background: #24242c; border: 1px solid #4a4a56; border-radius: 5px; padding: 3px; display: none; box-shadow: 0 6px 18px rgba(0,0,0,.55); }
+  #suggest div { padding: 4px 9px; font-size: 12px; border-radius: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #suggest div.sel { background: #35435a; }
+  #suggest div em { color: #77777f; font-style: normal; font-size: 10px; margin-left: 6px; }
+  /* 配方选择弹窗 */
+  #recipeModal { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; }
+  #recipeModal .box { width: 620px; max-height: 76vh; background: #1e1e24; border: 1px solid #4a4a56; border-radius: 6px; display: flex; flex-direction: column; padding: 12px; gap: 8px; }
+  #recipeModal h3 { margin: 0; font-size: 14px; color: #e8b44a; }
+  #recipeList { flex: 1; overflow-y: auto; border: 1px solid #3d3d48; border-radius: 4px; min-height: 240px; }
+  #recipeList div { padding: 5px 9px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #262630; }
+  #recipeList div:hover { background: #2f3644; }
+  #recipeList div.on { background: #2f6b3a; }
+  .hint { font-size: 11px; color: #77777f; line-height: 1.6; margin-top: 14px; }
+  #status { font-size: 12px; color: #9a9aa6; margin-left: auto; }
+  .mod-banner { font-size: 12px; color: #e8b44a; background: #2a2416; border: 1px solid #6a5320; border-radius: 4px; padding: 4px 10px; }
+  .mod-banner .warn { color: #e07a5f; }
+  .struct-help { font-size: 11px; color: #8a8a94; line-height: 1.6; margin-top: 4px; }
+  .struct-help b { color: #e8b44a; font-weight: 600; }
+  .struct-help code { color: #c9a94e; background: #1a1a20; padding: 0 3px; border-radius: 3px; }
+  .struct-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .sp-cell { width: 118px; font-size: 10px; color: #a8a8b2; }
+  .sp-icon { position: relative; width: 32px; height: 32px; background: #1b1b22; border: 1px solid #34343c; border-radius: 3px; }
+  .sp-icon img { width: 28px; height: 28px; margin: 2px; image-rendering: pixelated; }
+  .sp-badge { position: absolute; right: -2px; bottom: -2px; width: 16px; height: 16px; background: #1b1b22; border: 1px solid #34343c; border-radius: 2px; }
+  .sp-badge img { width: 12px; height: 12px; margin: 1px; image-rendering: pixelated; }
+  .sp-name { margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty { color: #77777f; font-size: 13px; padding: 20px 0; text-align: center; }
+  button:disabled { opacity: .4; cursor: default; }
+  #ctxMenu { position: fixed; z-index: 50; min-width: 150px; background: #24242c; border: 1px solid #4a4a56; border-radius: 5px; padding: 4px; display: none; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+  #ctxMenu div { padding: 6px 12px; font-size: 12px; border-radius: 3px; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; }
+  #ctxMenu div:hover { background: #35353d; }
+  #ctxMenu div.sep { padding: 0; height: 1px; background: #3d3d48; margin: 4px 0; cursor: default; }
+  #ctxMenu div.sep:hover { background: #3d3d48; }
+  #ctxMenu span { color: #77777f; font-size: 11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>科技瓶 · 科技树编辑器</h1>
+  <button id="btnOpen">打开 technologies 文件夹</button>
+  <button id="btnOpenFiles">选择 JSON 文件</button>
+  <button id="btnNew">新建研究</button>
+  <button id="btnDel">删除选中</button>
+  <button id="btnUndo" disabled title="撤销（Ctrl+Z）">撤销</button>
+  <button id="btnRedo" disabled title="重做（Ctrl+Y）">重做</button>
+  <button id="btnLayout">自动布局（递进式）</button>
+  <button id="btnSave" class="primary">保存全部</button>
+  <button id="btnExport">导出全部</button>
+  <button id="btnImport">导入物品清单</button>
+  <button id="btnImportRecipes">导入配方清单</button>
+  <button id="btnPickRecipe">导入配方…</button>
+  <span id="modBanner" class="mod-banner" style="display:none"></span>
+  <span id="status">未加载文件</span>
+</header>
+<main>
+  <div id="canvasWrap"><canvas id="cv"></canvas></div>
+  <aside id="side">
+    <div id="empty" class="empty">先在左上角打开<br><code>data/&lt;ns&gt;/sciencepacks/technologies</code><br>文件夹，或选择 JSON 文件。</div>
+    <div id="form" style="display:none">
+      <h2 id="formTitle">科技</h2>
+      <label>名称</label><input id="fName">
+      <label>描述</label><textarea id="fDesc"></textarea>
+      <label>图标<span class="q" data-tip="物品 id，支持自动补全，例如 minecraft:iron_pickaxe。">?</span></label><input id="fIcon">
+      <label>分类<span class="q" data-tip="用于分组和图标排序，可留空，例如 stone_age。">?</span></label><input id="fCategory">
+      <label>所需模组<span class="q" data-tip="只有这些模组存在时这项研究才加载；写 !模组id 表示「没有该模组才加载」。例如 create 或 !create，多个用分号分隔。">?</span></label><input id="fRequiredMods" placeholder="例如 create">
+      <label>互斥研究<span class="q" data-tip="列出的研究只要还在树里，本条就自动隐藏并不可研究；用来让模组研究替代原版研究。例如 sciencepacks:logistics_2。">?</span></label><input id="fExcludes" placeholder="例如 sciencepacks:logistics_2">
+      <div class="row">
+        <div><label>格子 X<span class="q" data-tip="研究树里的横向格子坐标，拖拽节点会自动写回。">?</span></label><input id="fX" type="number" step="1"></div>
+        <div><label>格子 Y<span class="q" data-tip="研究树里的纵向格子坐标，拖拽节点会自动写回。">?</span></label><input id="fY" type="number" step="1"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input id="fRoot" type="checkbox" style="width:auto;margin:0"> 根研究<span class="q" data-tip="把它设成一棵研究树的起点：忽略下面的前置科技，只要触发/材料满足就能研究，树里也不画入线。勾选时会清空当前前置列表（Ctrl+Z 可撤销）。">?</span>
+      </label>
+      <label>前置科技<span class="q" data-tip="搜索后点击切换；有多个前置时需要全部完成才能研究。">?</span></label>
+      <input id="fPrereqSearch" placeholder="搜索前置研究…">
+      <div class="chips" id="fPrereq"></div>
+      <label>触发条件<span class="q" data-tip="每行一个或分号分隔。写法：id*数量、block_break:id*数量、kill:id*数量、craft/smelt/pickup:id*数量、dimension:modid:dim。只写触发条件、不填材料的研究会在条件满足时免费解锁。">?</span></label><textarea id="fTriggers"></textarea>
+      <label>解锁配方<span class="q" data-tip="每行一个或分号分隔，支持模组配方 id。前缀 recipe: 只锁该配方；item: 只锁该物品的所有配方；不加前缀则两者都锁。">?</span></label><textarea id="fUnlocks"></textarea>
+      <label>多方块结构<span class="q" data-tip="每行一个或分号分隔。内置：nether_portal / end_portal / wither / iron_golem / snow_golem。通用：dimension:modid:dim、entity:modid:id、item_on_block:modid:item=modid:block。可选后缀 |大图标物品|显示名称|小角标物品 自定义外观。">?</span></label><textarea id="fStructures"></textarea>
+      <div class="struct-help">
+        <b>多方块结构</b> = 需要研究完成后才能搭建或使用的结构（下界门、末地门、凋灵、铁傀儡…）。
+        游戏里用「大图标 + 右下角小角标」表示：大图标是结构的核心物品，角标是使用它需要的东西（下界门 + 打火石、末地门 + 末影之眼）。<br>
+        写法：<code>核心id|大图标物品|显示名称|小角标物品</code>，例如
+        <code>nether_portal|minecraft:obsidian|下界传送门|minecraft:flint_and_steel</code>。
+        后三段都可以省略，省略时按内置规则自动取图标与角标。
+        <div class="struct-preview" id="structPreview"></div>
+      </div>
+      <label>白名单<span class="q" data-tip="每行一个或分号分隔。解锁前也允许合成的配方或物品：recipe: 只放行该配方；item: 放行该物品的所有配方。">?</span></label><textarea id="fWhitelist"></textarea>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input id="fHidden" type="checkbox" style="width:auto;margin:0"> 隐藏研究<span class="q" data-tip="满足显示条件后才出现在列表与研究树里；未显示时不能开始研究。">?</span>
+      </label>
+      <label>显示条件<span class="q" data-tip="每行一个或分号分隔，写法同触发条件，例如 minecraft:diamond*1 表示背包里有钻石才显示。">?</span></label><textarea id="fShowWhen"></textarea>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input id="fInfinite" type="checkbox" style="width:auto;margin:0"> 无限研究<span class="q" data-tip="可反复研究升级；每升一级，每轮材料按倍率翻倍。">?</span>
+      </label>
+      <div class="row">
+        <div><label>最高等级<span class="q" data-tip="0 表示不封顶。">?</span></label><input id="fMaxLevel" type="number" min="0"></div>
+        <div><label>每级消耗倍率<span class="q" data-tip="每升一级，每轮材料乘以该倍率，最小 1。">?</span></label><input id="fCostMultiplier" type="number" step="0.1" min="1"></div>
+      </div>
+      <label>数值型效果<span class="q" data-tip="每行一个。mining_speed:0.15 = 挖掘速度 +15%；reach:1.0 = 触及距离 +1；place_limit:8:minecraft:torch = 该方块上限 +8（需配合配置里的基础上限）。">?</span></label><textarea id="fEffects"></textarea>
+      <label>研究消耗<span class="q" data-tip="研究时间与轮次决定总耗时；每完成一轮消耗一整套材料，全部轮次完成后解锁。">?</span></label>
+      <div class="row">
+        <div><label>研究时间<span class="q" data-tip="每轮耗时（tick），0 表示使用全局默认值。">?</span></label><input id="fTime" type="number" min="0"></div>
+        <div><label>研究轮次<span class="q" data-tip="需要完成的轮数，每轮都消耗一次材料。">?</span></label><input id="fRounds" type="number" min="1"></div>
+      </div>
+      <div id="fCosts"></div>
+      <div class="quick" id="fQuick"></div>
+      <button id="btnAddCost" style="margin-top:4px">+ 自定义材料（输入物品 id）</button>
+      <div class="hint">
+        拖拽节点改位置，坐标会自动写回 JSON。<br>
+        双击画布空白处可重新居中，右键画布打开菜单。<br>
+        快捷键：Ctrl+Z 撤销、Ctrl+Y 重做、N 新建、Delete 删除选中。<br>
+        保存需要浏览器支持文件系统访问（Chrome / Edge）；否则用「导出全部」。
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div id="ctxMenu"></div>
+<div id="suggest"></div>
+<div id="tip"></div>
+<div id="recipeModal">
+  <div class="box">
+    <h3>从配方列表导入解锁配方</h3>
+    <input id="recipeSearch" placeholder="搜索配方 id…">
+    <div id="recipeList"></div>
+    <div class="row">
+      <div><button id="recipeAdd" class="primary">加入解锁配方</button></div>
+      <div><button id="recipeClose">关闭</button></div>
+    </div>
+    <div class="hint" id="recipeHint">配方清单为空？点顶部「导入配方清单」，选择游戏导出的 sciencepacks-recipes.json（/sciencepacks dumprecipes 生成）。</div>
+  </div>
+</div>
+<datalist id="itemList"></datalist>
+<datalist id="recipeIds"></datalist>
+<script>
+"use strict";
+
+/* 物品库：由游戏 registry 导出的 id 列表（原版 + 本模组） */
+const VANILLA_ITEMS = ["minecraft:acacia_boat","minecraft:acacia_button","minecraft:acacia_chest_boat","minecraft:acacia_door","minecraft:acacia_fence","minecraft:acacia_fence_gate","minecraft:acacia_hanging_sign","minecraft:acacia_leaves","minecraft:acacia_log","minecraft:acacia_planks","minecraft:acacia_pressure_plate","minecraft:acacia_sapling","minecraft:acacia_sign","minecraft:acacia_slab","minecraft:acacia_stairs","minecraft:acacia_trapdoor","minecraft:acacia_wood","minecraft:activator_rail","minecraft:air","minecraft:allay_spawn_egg","minecraft:allium","minecraft:amethyst_block","minecraft:amethyst_cluster","minecraft:amethyst_shard","minecraft:ancient_debris","minecraft:andesite","minecraft:andesite_slab","minecraft:andesite_stairs","minecraft:andesite_wall","minecraft:angler_pottery_sherd","minecraft:anvil","minecraft:apple","minecraft:archer_pottery_sherd","minecraft:armor_stand","minecraft:arms_up_pottery_sherd","minecraft:arrow","minecraft:axolotl_bucket","minecraft:axolotl_spawn_egg","minecraft:azalea","minecraft:azalea_leaves","minecraft:azure_bluet","minecraft:baked_potato","minecraft:bamboo","minecraft:bamboo_block","minecraft:bamboo_button","minecraft:bamboo_chest_raft","minecraft:bamboo_door","minecraft:bamboo_fence","minecraft:bamboo_fence_gate","minecraft:bamboo_hanging_sign","minecraft:bamboo_mosaic","minecraft:bamboo_mosaic_slab","minecraft:bamboo_mosaic_stairs","minecraft:bamboo_planks","minecraft:bamboo_pressure_plate","minecraft:bamboo_raft","minecraft:bamboo_sign","minecraft:bamboo_slab","minecraft:bamboo_stairs","minecraft:bamboo_trapdoor","minecraft:barrel","minecraft:barrier","minecraft:basalt","minecraft:bat_spawn_egg","minecraft:beacon","minecraft:bedrock","minecraft:bee_nest","minecraft:bee_spawn_egg","minecraft:beef","minecraft:beehive","minecraft:beetroot","minecraft:beetroot_seeds","minecraft:beetroot_soup","minecraft:bell","minecraft:big_dripleaf","minecraft:birch_boat","minecraft:birch_button","minecraft:birch_chest_boat","minecraft:birch_door","minecraft:birch_fence","minecraft:birch_fence_gate","minecraft:birch_hanging_sign","minecraft:birch_leaves","minecraft:birch_log","minecraft:birch_planks","minecraft:birch_pressure_plate","minecraft:birch_sapling","minecraft:birch_sign","minecraft:birch_slab","minecraft:birch_stairs","minecraft:birch_trapdoor","minecraft:birch_wood","minecraft:black_banner","minecraft:black_bed","minecraft:black_candle","minecraft:black_carpet","minecraft:black_concrete","minecraft:black_concrete_powder","minecraft:black_dye","minecraft:black_glazed_terracotta","minecraft:black_shulker_box","minecraft:black_stained_glass","minecraft:black_stained_glass_pane","minecraft:black_terracotta","minecraft:black_wool","minecraft:blackstone","minecraft:blackstone_slab","minecraft:blackstone_stairs","minecraft:blackstone_wall","minecraft:blade_pottery_sherd","minecraft:blast_furnace","minecraft:blaze_powder","minecraft:blaze_rod","minecraft:blaze_spawn_egg","minecraft:blue_banner","minecraft:blue_bed","minecraft:blue_candle","minecraft:blue_carpet","minecraft:blue_concrete","minecraft:blue_concrete_powder","minecraft:blue_dye","minecraft:blue_glazed_terracotta","minecraft:blue_ice","minecraft:blue_orchid","minecraft:blue_shulker_box","minecraft:blue_stained_glass","minecraft:blue_stained_glass_pane","minecraft:blue_terracotta","minecraft:blue_wool","minecraft:bone","minecraft:bone_block","minecraft:bone_meal","minecraft:book","minecraft:bookshelf","minecraft:bow","minecraft:bowl","minecraft:brain_coral","minecraft:brain_coral_block","minecraft:brain_coral_fan","minecraft:bread","minecraft:brewer_pottery_sherd","minecraft:brewing_stand","minecraft:brick","minecraft:brick_slab","minecraft:brick_stairs","minecraft:brick_wall","minecraft:bricks","minecraft:brown_banner","minecraft:brown_bed","minecraft:brown_candle","minecraft:brown_carpet","minecraft:brown_concrete","minecraft:brown_concrete_powder","minecraft:brown_dye","minecraft:brown_glazed_terracotta","minecraft:brown_mushroom","minecraft:brown_mushroom_block","minecraft:brown_shulker_box","minecraft:brown_stained_glass","minecraft:brown_stained_glass_pane","minecraft:brown_terracotta","minecraft:brown_wool","minecraft:brush","minecraft:bubble_coral","minecraft:bubble_coral_block","minecraft:bubble_coral_fan","minecraft:bucket","minecraft:budding_amethyst","minecraft:bundle","minecraft:burn_pottery_sherd","minecraft:cactus","minecraft:cake","minecraft:calcite","minecraft:calibrated_sculk_sensor","minecraft:camel_spawn_egg","minecraft:campfire","minecraft:candle","minecraft:carrot","minecraft:carrot_on_a_stick","minecraft:cartography_table","minecraft:carved_pumpkin","minecraft:cat_spawn_egg","minecraft:cauldron","minecraft:cave_spider_spawn_egg","minecraft:chain","minecraft:chain_command_block","minecraft:chainmail_boots","minecraft:chainmail_chestplate","minecraft:chainmail_helmet","minecraft:chainmail_leggings","minecraft:charcoal","minecraft:cherry_boat","minecraft:cherry_button","minecraft:cherry_chest_boat","minecraft:cherry_door","minecraft:cherry_fence","minecraft:cherry_fence_gate","minecraft:cherry_hanging_sign","minecraft:cherry_leaves","minecraft:cherry_log","minecraft:cherry_planks","minecraft:cherry_pressure_plate","minecraft:cherry_sapling","minecraft:cherry_sign","minecraft:cherry_slab","minecraft:cherry_stairs","minecraft:cherry_trapdoor","minecraft:cherry_wood","minecraft:chest","minecraft:chest_minecart","minecraft:chicken","minecraft:chicken_spawn_egg","minecraft:chipped_anvil","minecraft:chiseled_bookshelf","minecraft:chiseled_deepslate","minecraft:chiseled_nether_bricks","minecraft:chiseled_polished_blackstone","minecraft:chiseled_quartz_block","minecraft:chiseled_red_sandstone","minecraft:chiseled_sandstone","minecraft:chiseled_stone_bricks","minecraft:chorus_flower","minecraft:chorus_fruit","minecraft:chorus_plant","minecraft:clay","minecraft:clay_ball","minecraft:clock","minecraft:coal","minecraft:coal_block","minecraft:coal_ore","minecraft:coarse_dirt","minecraft:coast_armor_trim_smithing_template","minecraft:cobbled_deepslate","minecraft:cobbled_deepslate_slab","minecraft:cobbled_deepslate_stairs","minecraft:cobbled_deepslate_wall","minecraft:cobblestone","minecraft:cobblestone_slab","minecraft:cobblestone_stairs","minecraft:cobblestone_wall","minecraft:cobweb","minecraft:cocoa_beans","minecraft:cod","minecraft:cod_bucket","minecraft:cod_spawn_egg","minecraft:command_block","minecraft:command_block_minecart","minecraft:comparator","minecraft:compass","minecraft:composter","minecraft:conduit","minecraft:cooked_beef","minecraft:cooked_chicken","minecraft:cooked_cod","minecraft:cooked_mutton","minecraft:cooked_porkchop","minecraft:cooked_rabbit","minecraft:cooked_salmon","minecraft:cookie","minecraft:copper_block","minecraft:copper_ingot","minecraft:copper_ore","minecraft:cornflower","minecraft:cow_spawn_egg","minecraft:cracked_deepslate_bricks","minecraft:cracked_deepslate_tiles","minecraft:cracked_nether_bricks","minecraft:cracked_polished_blackstone_bricks","minecraft:cracked_stone_bricks","minecraft:crafting_table","minecraft:creeper_banner_pattern","minecraft:creeper_head","minecraft:creeper_spawn_egg","minecraft:crimson_button","minecraft:crimson_door","minecraft:crimson_fence","minecraft:crimson_fence_gate","minecraft:crimson_fungus","minecraft:crimson_hanging_sign","minecraft:crimson_hyphae","minecraft:crimson_nylium","minecraft:crimson_planks","minecraft:crimson_pressure_plate","minecraft:crimson_roots","minecraft:crimson_sign","minecraft:crimson_slab","minecraft:crimson_stairs","minecraft:crimson_stem","minecraft:crimson_trapdoor","minecraft:crossbow","minecraft:crying_obsidian","minecraft:cut_copper","minecraft:cut_copper_slab","minecraft:cut_copper_stairs","minecraft:cut_red_sandstone","minecraft:cut_red_sandstone_slab","minecraft:cut_sandstone","minecraft:cut_sandstone_slab","minecraft:cyan_banner","minecraft:cyan_bed","minecraft:cyan_candle","minecraft:cyan_carpet","minecraft:cyan_concrete","minecraft:cyan_concrete_powder","minecraft:cyan_dye","minecraft:cyan_glazed_terracotta","minecraft:cyan_shulker_box","minecraft:cyan_stained_glass","minecraft:cyan_stained_glass_pane","minecraft:cyan_terracotta","minecraft:cyan_wool","minecraft:damaged_anvil","minecraft:dandelion","minecraft:danger_pottery_sherd","minecraft:dark_oak_boat","minecraft:dark_oak_button","minecraft:dark_oak_chest_boat","minecraft:dark_oak_door","minecraft:dark_oak_fence","minecraft:dark_oak_fence_gate","minecraft:dark_oak_hanging_sign","minecraft:dark_oak_leaves","minecraft:dark_oak_log","minecraft:dark_oak_planks","minecraft:dark_oak_pressure_plate","minecraft:dark_oak_sapling","minecraft:dark_oak_sign","minecraft:dark_oak_slab","minecraft:dark_oak_stairs","minecraft:dark_oak_trapdoor","minecraft:dark_oak_wood","minecraft:dark_prismarine","minecraft:dark_prismarine_slab","minecraft:dark_prismarine_stairs","minecraft:daylight_detector","minecraft:dead_brain_coral","minecraft:dead_brain_coral_block","minecraft:dead_brain_coral_fan","minecraft:dead_bubble_coral","minecraft:dead_bubble_coral_block","minecraft:dead_bubble_coral_fan","minecraft:dead_bush","minecraft:dead_fire_coral","minecraft:dead_fire_coral_block","minecraft:dead_fire_coral_fan","minecraft:dead_horn_coral","minecraft:dead_horn_coral_block","minecraft:dead_horn_coral_fan","minecraft:dead_tube_coral","minecraft:dead_tube_coral_block","minecraft:dead_tube_coral_fan","minecraft:debug_stick","minecraft:decorated_pot","minecraft:deepslate","minecraft:deepslate_brick_slab","minecraft:deepslate_brick_stairs","minecraft:deepslate_brick_wall","minecraft:deepslate_bricks","minecraft:deepslate_coal_ore","minecraft:deepslate_copper_ore","minecraft:deepslate_diamond_ore","minecraft:deepslate_emerald_ore","minecraft:deepslate_gold_ore","minecraft:deepslate_iron_ore","minecraft:deepslate_lapis_ore","minecraft:deepslate_redstone_ore","minecraft:deepslate_tile_slab","minecraft:deepslate_tile_stairs","minecraft:deepslate_tile_wall","minecraft:deepslate_tiles","minecraft:detector_rail","minecraft:diamond","minecraft:diamond_axe","minecraft:diamond_block","minecraft:diamond_boots","minecraft:diamond_chestplate","minecraft:diamond_helmet","minecraft:diamond_hoe","minecraft:diamond_horse_armor","minecraft:diamond_leggings","minecraft:diamond_ore","minecraft:diamond_pickaxe","minecraft:diamond_shovel","minecraft:diamond_sword","minecraft:diorite","minecraft:diorite_slab","minecraft:diorite_stairs","minecraft:diorite_wall","minecraft:dirt","minecraft:dirt_path","minecraft:disc_fragment_5","minecraft:dispenser","minecraft:dolphin_spawn_egg","minecraft:donkey_spawn_egg","minecraft:dragon_breath","minecraft:dragon_egg","minecraft:dragon_head","minecraft:dried_kelp","minecraft:dried_kelp_block","minecraft:dripstone_block","minecraft:dropper","minecraft:drowned_spawn_egg","minecraft:dune_armor_trim_smithing_template","minecraft:echo_shard","minecraft:egg","minecraft:elder_guardian_spawn_egg","minecraft:elytra","minecraft:emerald","minecraft:emerald_block","minecraft:emerald_ore","minecraft:enchanted_book","minecraft:enchanted_golden_apple","minecraft:enchanting_table","minecraft:end_crystal","minecraft:end_portal_frame","minecraft:end_rod","minecraft:end_stone","minecraft:end_stone_brick_slab","minecraft:end_stone_brick_stairs","minecraft:end_stone_brick_wall","minecraft:end_stone_bricks","minecraft:ender_chest","minecraft:ender_dragon_spawn_egg","minecraft:ender_eye","minecraft:ender_pearl","minecraft:enderman_spawn_egg","minecraft:endermite_spawn_egg","minecraft:evoker_spawn_egg","minecraft:experience_bottle","minecraft:explorer_pottery_sherd","minecraft:exposed_copper","minecraft:exposed_cut_copper","minecraft:exposed_cut_copper_slab","minecraft:exposed_cut_copper_stairs","minecraft:eye_armor_trim_smithing_template","minecraft:farmland","minecraft:feather","minecraft:fermented_spider_eye","minecraft:fern","minecraft:filled_map","minecraft:fire_charge","minecraft:fire_coral","minecraft:fire_coral_block","minecraft:fire_coral_fan","minecraft:firework_rocket","minecraft:firework_star","minecraft:fishing_rod","minecraft:fletching_table","minecraft:flint","minecraft:flint_and_steel","minecraft:flower_banner_pattern","minecraft:flower_pot","minecraft:flowering_azalea","minecraft:flowering_azalea_leaves","minecraft:fox_spawn_egg","minecraft:friend_pottery_sherd","minecraft:frog_spawn_egg","minecraft:frogspawn","minecraft:furnace","minecraft:furnace_minecart","minecraft:ghast_spawn_egg","minecraft:ghast_tear","minecraft:gilded_blackstone","minecraft:glass","minecraft:glass_bottle","minecraft:glass_pane","minecraft:glistering_melon_slice","minecraft:globe_banner_pattern","minecraft:glow_berries","minecraft:glow_ink_sac","minecraft:glow_item_frame","minecraft:glow_lichen","minecraft:glow_squid_spawn_egg","minecraft:glowstone","minecraft:glowstone_dust","minecraft:goat_horn","minecraft:goat_spawn_egg","minecraft:gold_block","minecraft:gold_ingot","minecraft:gold_nugget","minecraft:gold_ore","minecraft:golden_apple","minecraft:golden_axe","minecraft:golden_boots","minecraft:golden_carrot","minecraft:golden_chestplate","minecraft:golden_helmet","minecraft:golden_hoe","minecraft:golden_horse_armor","minecraft:golden_leggings","minecraft:golden_pickaxe","minecraft:golden_shovel","minecraft:golden_sword","minecraft:granite","minecraft:granite_slab","minecraft:granite_stairs","minecraft:granite_wall","minecraft:grass","minecraft:grass_block","minecraft:gravel","minecraft:gray_banner","minecraft:gray_bed","minecraft:gray_candle","minecraft:gray_carpet","minecraft:gray_concrete","minecraft:gray_concrete_powder","minecraft:gray_dye","minecraft:gray_glazed_terracotta","minecraft:gray_shulker_box","minecraft:gray_stained_glass","minecraft:gray_stained_glass_pane","minecraft:gray_terracotta","minecraft:gray_wool","minecraft:green_banner","minecraft:green_bed","minecraft:green_candle","minecraft:green_carpet","minecraft:green_concrete","minecraft:green_concrete_powder","minecraft:green_dye","minecraft:green_glazed_terracotta","minecraft:green_shulker_box","minecraft:green_stained_glass","minecraft:green_stained_glass_pane","minecraft:green_terracotta","minecraft:green_wool","minecraft:grindstone","minecraft:guardian_spawn_egg","minecraft:gunpowder","minecraft:hanging_roots","minecraft:hay_block","minecraft:heart_of_the_sea","minecraft:heart_pottery_sherd","minecraft:heartbreak_pottery_sherd","minecraft:heavy_weighted_pressure_plate","minecraft:hoglin_spawn_egg","minecraft:honey_block","minecraft:honey_bottle","minecraft:honeycomb","minecraft:honeycomb_block","minecraft:hopper","minecraft:hopper_minecart","minecraft:horn_coral","minecraft:horn_coral_block","minecraft:horn_coral_fan","minecraft:horse_spawn_egg","minecraft:host_armor_trim_smithing_template","minecraft:howl_pottery_sherd","minecraft:husk_spawn_egg","minecraft:ice","minecraft:infested_chiseled_stone_bricks","minecraft:infested_cobblestone","minecraft:infested_cracked_stone_bricks","minecraft:infested_deepslate","minecraft:infested_mossy_stone_bricks","minecraft:infested_stone","minecraft:infested_stone_bricks","minecraft:ink_sac","minecraft:iron_axe","minecraft:iron_bars","minecraft:iron_block","minecraft:iron_boots","minecraft:iron_chestplate","minecraft:iron_door","minecraft:iron_golem_spawn_egg","minecraft:iron_helmet","minecraft:iron_hoe","minecraft:iron_horse_armor","minecraft:iron_ingot","minecraft:iron_leggings","minecraft:iron_nugget","minecraft:iron_ore","minecraft:iron_pickaxe","minecraft:iron_shovel","minecraft:iron_sword","minecraft:iron_trapdoor","minecraft:item_frame","minecraft:jack_o_lantern","minecraft:jigsaw","minecraft:jukebox","minecraft:jungle_boat","minecraft:jungle_button","minecraft:jungle_chest_boat","minecraft:jungle_door","minecraft:jungle_fence","minecraft:jungle_fence_gate","minecraft:jungle_hanging_sign","minecraft:jungle_leaves","minecraft:jungle_log","minecraft:jungle_planks","minecraft:jungle_pressure_plate","minecraft:jungle_sapling","minecraft:jungle_sign","minecraft:jungle_slab","minecraft:jungle_stairs","minecraft:jungle_trapdoor","minecraft:jungle_wood","minecraft:kelp","minecraft:knowledge_book","minecraft:ladder","minecraft:lantern","minecraft:lapis_block","minecraft:lapis_lazuli","minecraft:lapis_ore","minecraft:large_amethyst_bud","minecraft:large_fern","minecraft:lava_bucket","minecraft:lead","minecraft:leather","minecraft:leather_boots","minecraft:leather_chestplate","minecraft:leather_helmet","minecraft:leather_horse_armor","minecraft:leather_leggings","minecraft:lectern","minecraft:lever","minecraft:light","minecraft:light_blue_banner","minecraft:light_blue_bed","minecraft:light_blue_candle","minecraft:light_blue_carpet","minecraft:light_blue_concrete","minecraft:light_blue_concrete_powder","minecraft:light_blue_dye","minecraft:light_blue_glazed_terracotta","minecraft:light_blue_shulker_box","minecraft:light_blue_stained_glass","minecraft:light_blue_stained_glass_pane","minecraft:light_blue_terracotta","minecraft:light_blue_wool","minecraft:light_gray_banner","minecraft:light_gray_bed","minecraft:light_gray_candle","minecraft:light_gray_carpet","minecraft:light_gray_concrete","minecraft:light_gray_concrete_powder","minecraft:light_gray_dye","minecraft:light_gray_glazed_terracotta","minecraft:light_gray_shulker_box","minecraft:light_gray_stained_glass","minecraft:light_gray_stained_glass_pane","minecraft:light_gray_terracotta","minecraft:light_gray_wool","minecraft:light_weighted_pressure_plate","minecraft:lightning_rod","minecraft:lilac","minecraft:lily_of_the_valley","minecraft:lily_pad","minecraft:lime_banner","minecraft:lime_bed","minecraft:lime_candle","minecraft:lime_carpet","minecraft:lime_concrete","minecraft:lime_concrete_powder","minecraft:lime_dye","minecraft:lime_glazed_terracotta","minecraft:lime_shulker_box","minecraft:lime_stained_glass","minecraft:lime_stained_glass_pane","minecraft:lime_terracotta","minecraft:lime_wool","minecraft:lingering_potion","minecraft:llama_spawn_egg","minecraft:lodestone","minecraft:loom","minecraft:magenta_banner","minecraft:magenta_bed","minecraft:magenta_candle","minecraft:magenta_carpet","minecraft:magenta_concrete","minecraft:magenta_concrete_powder","minecraft:magenta_dye","minecraft:magenta_glazed_terracotta","minecraft:magenta_shulker_box","minecraft:magenta_stained_glass","minecraft:magenta_stained_glass_pane","minecraft:magenta_terracotta","minecraft:magenta_wool","minecraft:magma_block","minecraft:magma_cream","minecraft:magma_cube_spawn_egg","minecraft:mangrove_boat","minecraft:mangrove_button","minecraft:mangrove_chest_boat","minecraft:mangrove_door","minecraft:mangrove_fence","minecraft:mangrove_fence_gate","minecraft:mangrove_hanging_sign","minecraft:mangrove_leaves","minecraft:mangrove_log","minecraft:mangrove_planks","minecraft:mangrove_pressure_plate","minecraft:mangrove_propagule","minecraft:mangrove_roots","minecraft:mangrove_sign","minecraft:mangrove_slab","minecraft:mangrove_stairs","minecraft:mangrove_trapdoor","minecraft:mangrove_wood","minecraft:map","minecraft:medium_amethyst_bud","minecraft:melon","minecraft:melon_seeds","minecraft:melon_slice","minecraft:milk_bucket","minecraft:minecart","minecraft:miner_pottery_sherd","minecraft:mojang_banner_pattern","minecraft:mooshroom_spawn_egg","minecraft:moss_block","minecraft:moss_carpet","minecraft:mossy_cobblestone","minecraft:mossy_cobblestone_slab","minecraft:mossy_cobblestone_stairs","minecraft:mossy_cobblestone_wall","minecraft:mossy_stone_brick_slab","minecraft:mossy_stone_brick_stairs","minecraft:mossy_stone_brick_wall","minecraft:mossy_stone_bricks","minecraft:mourner_pottery_sherd","minecraft:mud","minecraft:mud_brick_slab","minecraft:mud_brick_stairs","minecraft:mud_brick_wall","minecraft:mud_bricks","minecraft:muddy_mangrove_roots","minecraft:mule_spawn_egg","minecraft:mushroom_stem","minecraft:mushroom_stew","minecraft:music_disc_11","minecraft:music_disc_13","minecraft:music_disc_5","minecraft:music_disc_blocks","minecraft:music_disc_cat","minecraft:music_disc_chirp","minecraft:music_disc_far","minecraft:music_disc_mall","minecraft:music_disc_mellohi","minecraft:music_disc_otherside","minecraft:music_disc_pigstep","minecraft:music_disc_relic","minecraft:music_disc_stal","minecraft:music_disc_strad","minecraft:music_disc_wait","minecraft:music_disc_ward","minecraft:mutton","minecraft:mycelium","minecraft:name_tag","minecraft:nautilus_shell","minecraft:nether_brick","minecraft:nether_brick_fence","minecraft:nether_brick_slab","minecraft:nether_brick_stairs","minecraft:nether_brick_wall","minecraft:nether_bricks","minecraft:nether_gold_ore","minecraft:nether_quartz_ore","minecraft:nether_sprouts","minecraft:nether_star","minecraft:nether_wart","minecraft:nether_wart_block","minecraft:netherite_axe","minecraft:netherite_block","minecraft:netherite_boots","minecraft:netherite_chestplate","minecraft:netherite_helmet","minecraft:netherite_hoe","minecraft:netherite_ingot","minecraft:netherite_leggings","minecraft:netherite_pickaxe","minecraft:netherite_scrap","minecraft:netherite_shovel","minecraft:netherite_sword","minecraft:netherite_upgrade_smithing_template","minecraft:netherrack","minecraft:note_block","minecraft:oak_boat","minecraft:oak_button","minecraft:oak_chest_boat","minecraft:oak_door","minecraft:oak_fence","minecraft:oak_fence_gate","minecraft:oak_hanging_sign","minecraft:oak_leaves","minecraft:oak_log","minecraft:oak_planks","minecraft:oak_pressure_plate","minecraft:oak_sapling","minecraft:oak_sign","minecraft:oak_slab","minecraft:oak_stairs","minecraft:oak_trapdoor","minecraft:oak_wood","minecraft:observer","minecraft:obsidian","minecraft:ocelot_spawn_egg","minecraft:ochre_froglight","minecraft:orange_banner","minecraft:orange_bed","minecraft:orange_candle","minecraft:orange_carpet","minecraft:orange_concrete","minecraft:orange_concrete_powder","minecraft:orange_dye","minecraft:orange_glazed_terracotta","minecraft:orange_shulker_box","minecraft:orange_stained_glass","minecraft:orange_stained_glass_pane","minecraft:orange_terracotta","minecraft:orange_tulip","minecraft:orange_wool","minecraft:oxeye_daisy","minecraft:oxidized_copper","minecraft:oxidized_cut_copper","minecraft:oxidized_cut_copper_slab","minecraft:oxidized_cut_copper_stairs","minecraft:packed_ice","minecraft:packed_mud","minecraft:painting","minecraft:panda_spawn_egg","minecraft:paper","minecraft:parrot_spawn_egg","minecraft:pearlescent_froglight","minecraft:peony","minecraft:petrified_oak_slab","minecraft:phantom_membrane","minecraft:phantom_spawn_egg","minecraft:pig_spawn_egg","minecraft:piglin_banner_pattern","minecraft:piglin_brute_spawn_egg","minecraft:piglin_head","minecraft:piglin_spawn_egg","minecraft:pillager_spawn_egg","minecraft:pink_banner","minecraft:pink_bed","minecraft:pink_candle","minecraft:pink_carpet","minecraft:pink_concrete","minecraft:pink_concrete_powder","minecraft:pink_dye","minecraft:pink_glazed_terracotta","minecraft:pink_petals","minecraft:pink_shulker_box","minecraft:pink_stained_glass","minecraft:pink_stained_glass_pane","minecraft:pink_terracotta","minecraft:pink_tulip","minecraft:pink_wool","minecraft:piston","minecraft:pitcher_plant","minecraft:pitcher_pod","minecraft:player_head","minecraft:plenty_pottery_sherd","minecraft:podzol","minecraft:pointed_dripstone","minecraft:poisonous_potato","minecraft:polar_bear_spawn_egg","minecraft:polished_andesite","minecraft:polished_andesite_slab","minecraft:polished_andesite_stairs","minecraft:polished_basalt","minecraft:polished_blackstone","minecraft:polished_blackstone_brick_slab","minecraft:polished_blackstone_brick_stairs","minecraft:polished_blackstone_brick_wall","minecraft:polished_blackstone_bricks","minecraft:polished_blackstone_button","minecraft:polished_blackstone_pressure_plate","minecraft:polished_blackstone_slab","minecraft:polished_blackstone_stairs","minecraft:polished_blackstone_wall","minecraft:polished_deepslate","minecraft:polished_deepslate_slab","minecraft:polished_deepslate_stairs","minecraft:polished_deepslate_wall","minecraft:polished_diorite","minecraft:polished_diorite_slab","minecraft:polished_diorite_stairs","minecraft:polished_granite","minecraft:polished_granite_slab","minecraft:polished_granite_stairs","minecraft:popped_chorus_fruit","minecraft:poppy","minecraft:porkchop","minecraft:potato","minecraft:potion","minecraft:powder_snow_bucket","minecraft:powered_rail","minecraft:prismarine","minecraft:prismarine_brick_slab","minecraft:prismarine_brick_stairs","minecraft:prismarine_bricks","minecraft:prismarine_crystals","minecraft:prismarine_shard","minecraft:prismarine_slab","minecraft:prismarine_stairs","minecraft:prismarine_wall","minecraft:prize_pottery_sherd","minecraft:pufferfish","minecraft:pufferfish_bucket","minecraft:pufferfish_spawn_egg","minecraft:pumpkin","minecraft:pumpkin_pie","minecraft:pumpkin_seeds","minecraft:purple_banner","minecraft:purple_bed","minecraft:purple_candle","minecraft:purple_carpet","minecraft:purple_concrete","minecraft:purple_concrete_powder","minecraft:purple_dye","minecraft:purple_glazed_terracotta","minecraft:purple_shulker_box","minecraft:purple_stained_glass","minecraft:purple_stained_glass_pane","minecraft:purple_terracotta","minecraft:purple_wool","minecraft:purpur_block","minecraft:purpur_pillar","minecraft:purpur_slab","minecraft:purpur_stairs","minecraft:quartz","minecraft:quartz_block","minecraft:quartz_bricks","minecraft:quartz_pillar","minecraft:quartz_slab","minecraft:quartz_stairs","minecraft:rabbit","minecraft:rabbit_foot","minecraft:rabbit_hide","minecraft:rabbit_spawn_egg","minecraft:rabbit_stew","minecraft:rail","minecraft:raiser_armor_trim_smithing_template","minecraft:ravager_spawn_egg","minecraft:raw_copper","minecraft:raw_copper_block","minecraft:raw_gold","minecraft:raw_gold_block","minecraft:raw_iron","minecraft:raw_iron_block","minecraft:recovery_compass","minecraft:red_banner","minecraft:red_bed","minecraft:red_candle","minecraft:red_carpet","minecraft:red_concrete","minecraft:red_concrete_powder","minecraft:red_dye","minecraft:red_glazed_terracotta","minecraft:red_mushroom","minecraft:red_mushroom_block","minecraft:red_nether_brick_slab","minecraft:red_nether_brick_stairs","minecraft:red_nether_brick_wall","minecraft:red_nether_bricks","minecraft:red_sand","minecraft:red_sandstone","minecraft:red_sandstone_slab","minecraft:red_sandstone_stairs","minecraft:red_sandstone_wall","minecraft:red_shulker_box","minecraft:red_stained_glass","minecraft:red_stained_glass_pane","minecraft:red_terracotta","minecraft:red_tulip","minecraft:red_wool","minecraft:redstone","minecraft:redstone_block","minecraft:redstone_lamp","minecraft:redstone_ore","minecraft:redstone_torch","minecraft:reinforced_deepslate","minecraft:repeater","minecraft:repeating_command_block","minecraft:respawn_anchor","minecraft:rib_armor_trim_smithing_template","minecraft:rooted_dirt","minecraft:rose_bush","minecraft:rotten_flesh","minecraft:saddle","minecraft:salmon","minecraft:salmon_bucket","minecraft:salmon_spawn_egg","minecraft:sand","minecraft:sandstone","minecraft:sandstone_slab","minecraft:sandstone_stairs","minecraft:sandstone_wall","minecraft:scaffolding","minecraft:sculk","minecraft:sculk_catalyst","minecraft:sculk_sensor","minecraft:sculk_shrieker","minecraft:sculk_vein","minecraft:scute","minecraft:sea_lantern","minecraft:sea_pickle","minecraft:seagrass","minecraft:sentry_armor_trim_smithing_template","minecraft:shaper_armor_trim_smithing_template","minecraft:sheaf_pottery_sherd","minecraft:shears","minecraft:sheep_spawn_egg","minecraft:shelter_pottery_sherd","minecraft:shield","minecraft:shroomlight","minecraft:shulker_box","minecraft:shulker_shell","minecraft:shulker_spawn_egg","minecraft:silence_armor_trim_smithing_template","minecraft:silverfish_spawn_egg","minecraft:skeleton_horse_spawn_egg","minecraft:skeleton_skull","minecraft:skeleton_spawn_egg","minecraft:skull_banner_pattern","minecraft:skull_pottery_sherd","minecraft:slime_ball","minecraft:slime_block","minecraft:slime_spawn_egg","minecraft:small_amethyst_bud","minecraft:small_dripleaf","minecraft:smithing_table","minecraft:smoker","minecraft:smooth_basalt","minecraft:smooth_quartz","minecraft:smooth_quartz_slab","minecraft:smooth_quartz_stairs","minecraft:smooth_red_sandstone","minecraft:smooth_red_sandstone_slab","minecraft:smooth_red_sandstone_stairs","minecraft:smooth_sandstone","minecraft:smooth_sandstone_slab","minecraft:smooth_sandstone_stairs","minecraft:smooth_stone","minecraft:smooth_stone_slab","minecraft:sniffer_egg","minecraft:sniffer_spawn_egg","minecraft:snort_pottery_sherd","minecraft:snout_armor_trim_smithing_template","minecraft:snow","minecraft:snow_block","minecraft:snow_golem_spawn_egg","minecraft:snowball","minecraft:soul_campfire","minecraft:soul_lantern","minecraft:soul_sand","minecraft:soul_soil","minecraft:soul_torch","minecraft:spawner","minecraft:spectral_arrow","minecraft:spider_eye","minecraft:spider_spawn_egg","minecraft:spire_armor_trim_smithing_template","minecraft:splash_potion","minecraft:sponge","minecraft:spore_blossom","minecraft:spruce_boat","minecraft:spruce_button","minecraft:spruce_chest_boat","minecraft:spruce_door","minecraft:spruce_fence","minecraft:spruce_fence_gate","minecraft:spruce_hanging_sign","minecraft:spruce_leaves","minecraft:spruce_log","minecraft:spruce_planks","minecraft:spruce_pressure_plate","minecraft:spruce_sapling","minecraft:spruce_sign","minecraft:spruce_slab","minecraft:spruce_stairs","minecraft:spruce_trapdoor","minecraft:spruce_wood","minecraft:spyglass","minecraft:squid_spawn_egg","minecraft:stick","minecraft:sticky_piston","minecraft:stone","minecraft:stone_axe","minecraft:stone_brick_slab","minecraft:stone_brick_stairs","minecraft:stone_brick_wall","minecraft:stone_bricks","minecraft:stone_button","minecraft:stone_hoe","minecraft:stone_pickaxe","minecraft:stone_pressure_plate","minecraft:stone_shovel","minecraft:stone_slab","minecraft:stone_stairs","minecraft:stone_sword","minecraft:stonecutter","minecraft:stray_spawn_egg","minecraft:strider_spawn_egg","minecraft:string","minecraft:stripped_acacia_log","minecraft:stripped_acacia_wood","minecraft:stripped_bamboo_block","minecraft:stripped_birch_log","minecraft:stripped_birch_wood","minecraft:stripped_cherry_log","minecraft:stripped_cherry_wood","minecraft:stripped_crimson_hyphae","minecraft:stripped_crimson_stem","minecraft:stripped_dark_oak_log","minecraft:stripped_dark_oak_wood","minecraft:stripped_jungle_log","minecraft:stripped_jungle_wood","minecraft:stripped_mangrove_log","minecraft:stripped_mangrove_wood","minecraft:stripped_oak_log","minecraft:stripped_oak_wood","minecraft:stripped_spruce_log","minecraft:stripped_spruce_wood","minecraft:stripped_warped_hyphae","minecraft:stripped_warped_stem","minecraft:structure_block","minecraft:structure_void","minecraft:sugar","minecraft:sugar_cane","minecraft:sunflower","minecraft:suspicious_gravel","minecraft:suspicious_sand","minecraft:suspicious_stew","minecraft:sweet_berries","minecraft:tadpole_bucket","minecraft:tadpole_spawn_egg","minecraft:tall_grass","minecraft:target","minecraft:terracotta","minecraft:tide_armor_trim_smithing_template","minecraft:tinted_glass","minecraft:tipped_arrow","minecraft:tnt","minecraft:tnt_minecart","minecraft:torch","minecraft:torchflower","minecraft:torchflower_seeds","minecraft:totem_of_undying","minecraft:trader_llama_spawn_egg","minecraft:trapped_chest","minecraft:trident","minecraft:tripwire_hook","minecraft:tropical_fish","minecraft:tropical_fish_bucket","minecraft:tropical_fish_spawn_egg","minecraft:tube_coral","minecraft:tube_coral_block","minecraft:tube_coral_fan","minecraft:tuff","minecraft:turtle_egg","minecraft:turtle_helmet","minecraft:turtle_spawn_egg","minecraft:twisting_vines","minecraft:verdant_froglight","minecraft:vex_armor_trim_smithing_template","minecraft:vex_spawn_egg","minecraft:villager_spawn_egg","minecraft:vindicator_spawn_egg","minecraft:vine","minecraft:wandering_trader_spawn_egg","minecraft:ward_armor_trim_smithing_template","minecraft:warden_spawn_egg","minecraft:warped_button","minecraft:warped_door","minecraft:warped_fence","minecraft:warped_fence_gate","minecraft:warped_fungus","minecraft:warped_fungus_on_a_stick","minecraft:warped_hanging_sign","minecraft:warped_hyphae","minecraft:warped_nylium","minecraft:warped_planks","minecraft:warped_pressure_plate","minecraft:warped_roots","minecraft:warped_sign","minecraft:warped_slab","minecraft:warped_stairs","minecraft:warped_stem","minecraft:warped_trapdoor","minecraft:warped_wart_block","minecraft:water_bucket","minecraft:waxed_copper_block","minecraft:waxed_cut_copper","minecraft:waxed_cut_copper_slab","minecraft:waxed_cut_copper_stairs","minecraft:waxed_exposed_copper","minecraft:waxed_exposed_cut_copper","minecraft:waxed_exposed_cut_copper_slab","minecraft:waxed_exposed_cut_copper_stairs","minecraft:waxed_oxidized_copper","minecraft:waxed_oxidized_cut_copper","minecraft:waxed_oxidized_cut_copper_slab","minecraft:waxed_oxidized_cut_copper_stairs","minecraft:waxed_weathered_copper","minecraft:waxed_weathered_cut_copper","minecraft:waxed_weathered_cut_copper_slab","minecraft:waxed_weathered_cut_copper_stairs","minecraft:wayfinder_armor_trim_smithing_template","minecraft:weathered_copper","minecraft:weathered_cut_copper","minecraft:weathered_cut_copper_slab","minecraft:weathered_cut_copper_stairs","minecraft:weeping_vines","minecraft:wet_sponge","minecraft:wheat","minecraft:wheat_seeds","minecraft:white_banner","minecraft:white_bed","minecraft:white_candle","minecraft:white_carpet","minecraft:white_concrete","minecraft:white_concrete_powder","minecraft:white_dye","minecraft:white_glazed_terracotta","minecraft:white_shulker_box","minecraft:white_stained_glass","minecraft:white_stained_glass_pane","minecraft:white_terracotta","minecraft:white_tulip","minecraft:white_wool","minecraft:wild_armor_trim_smithing_template","minecraft:witch_spawn_egg","minecraft:wither_rose","minecraft:wither_skeleton_skull","minecraft:wither_skeleton_spawn_egg","minecraft:wither_spawn_egg","minecraft:wolf_spawn_egg","minecraft:wooden_axe","minecraft:wooden_hoe","minecraft:wooden_pickaxe","minecraft:wooden_shovel","minecraft:wooden_sword","minecraft:writable_book","minecraft:written_book","minecraft:yellow_banner","minecraft:yellow_bed","minecraft:yellow_candle","minecraft:yellow_carpet","minecraft:yellow_concrete","minecraft:yellow_concrete_powder","minecraft:yellow_dye","minecraft:yellow_glazed_terracotta","minecraft:yellow_shulker_box","minecraft:yellow_stained_glass","minecraft:yellow_stained_glass_pane","minecraft:yellow_terracotta","minecraft:yellow_wool","minecraft:zoglin_spawn_egg","minecraft:zombie_head","minecraft:zombie_horse_spawn_egg","minecraft:zombie_spawn_egg","minecraft:zombie_villager_spawn_egg","minecraft:zombified_piglin_spawn_egg","sciencepacks:pack_blue","sciencepacks:pack_green","sciencepacks:pack_purple","sciencepacks:pack_red","sciencepacks:research_station","sciencepacks:research_tablet"];
+
+const CV = document.getElementById('cv');
+const CTX = CV.getContext('2d');
+const wrap = document.getElementById('canvasWrap');
+const statusEl = document.getElementById('status');
+
+let files = [];          // { name, handle, data }
+let byId = new Map();    // id -> file
+let selected = null;
+let scale = 1;
+let offsetX = 60, offsetY = 40;
+let dragging = null;     // { file, dx, dy }
+let panning = null;
+let moved = false;
+let dirHandle = null;    // 通过「打开文件夹」时的目录句柄，用于新建/删除文件
+let undoStack = [], redoStack = [];
+const MAX_HISTORY = 100;
+
+/* ---------- 物品库：原版 + 模组导出 ---------- */
+let ALL_ITEMS = VANILLA_ITEMS.slice();
+const IMPORTED_KEY = 'sciencepacks.importedItems';
+
+function loadImportedItems() {
+  try {
+    const raw = localStorage.getItem(IMPORTED_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) ALL_ITEMS = [...new Set(ALL_ITEMS.concat(arr))].sort();
+  } catch (e) { console.warn(e); }
+}
+
+function saveImportedItems(ids) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(IMPORTED_KEY) || '[]');
+    localStorage.setItem(IMPORTED_KEY, JSON.stringify([...new Set(prev.concat(ids))]));
+  } catch (e) { console.warn(e); }
+}
+
+function rebuildItemList() {
+  const dl = document.getElementById('itemList');
+  dl.innerHTML = '';
+  for (const id of ALL_ITEMS) {
+    const option = document.createElement('option');
+    option.value = id;
+    dl.appendChild(option);
+  }
+}
+
+function itemSuggest(input) {
+  input.setAttribute('list', 'itemList');
+  return input;
+}
+
+/* ---------- 配方库：由 /sciencepacks dumprecipes 导出的 sciencepacks-recipes.json ---------- */
+let ALL_RECIPES = [];
+const RECIPE_KEY = 'sciencepacks.importedRecipes';
+
+function loadRecipes() {
+  try {
+    const raw = localStorage.getItem(RECIPE_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) ALL_RECIPES = [...new Set(arr)].sort();
+  } catch (e) { console.warn(e); }
+}
+
+function saveRecipes(ids) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(RECIPE_KEY) || '[]');
+    localStorage.setItem(RECIPE_KEY, JSON.stringify([...new Set(prev.concat(ids))]));
+  } catch (e) { console.warn(e); }
+}
+
+function rebuildRecipeList() {
+  const dl = document.getElementById('recipeIds');
+  dl.innerHTML = '';
+  for (const id of ALL_RECIPES) {
+    const option = document.createElement('option');
+    option.value = id;
+    dl.appendChild(option);
+  }
+}
+
+function importRecipesFromText(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { alert('读取失败：' + e); return 0; }
+  let ids = [];
+  if (Array.isArray(data)) ids = data;
+  else if (data && Array.isArray(data.recipes)) ids = data.recipes;
+  else if (data && typeof data === 'object') ids = Object.keys(data); // dump 格式：{ "recipe id": "owner tech" }
+  ids = ids.filter(v => typeof v === 'string' && v.includes(':'));
+  if (!ids.length) {
+    alert('这个 JSON 里没找到配方 id。\n支持 game 导出的 { "配方id": "科技id" } 或 ["配方id", ...]。');
+    return 0;
+  }
+  ALL_RECIPES = [...new Set(ALL_RECIPES.concat(ids))].sort();
+  saveRecipes(ids);
+  rebuildRecipeList();
+  statusEl.textContent = '已导入 ' + ids.length + ' 个配方 id（当前可补全 ' + ALL_RECIPES.length + ' 个）';
+  return ids.length;
+}
+
+function importRecipes() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    importRecipesFromText(await file.text());
+  };
+  input.click();
+}
+
+/* ---------- 行内自动补全（textarea） ---------- */
+const suggestEl = document.getElementById('suggest');
+let suggestState = null;
+
+const TRIGGER_TYPES = ['item', 'block_break', 'kill', 'craft', 'smelt', 'pickup', 'dimension'];
+const EFFECT_TYPES = ['mining_speed', 'reach', 'place_limit'];
+const STRUCTURE_PRESETS = ['nether_portal', 'end_portal', 'wither', 'iron_golem', 'snow_golem',
+  'dimension:', 'entity:', 'item_on_block:'];
+
+function hideSuggest() { suggestEl.style.display = 'none'; suggestState = null; }
+
+function caretRect(el) {
+  const r = el.getBoundingClientRect();
+  if (el.tagName !== 'TEXTAREA') return { left: r.left, top: r.bottom };
+  const cs = getComputedStyle(el);
+  const div = document.createElement('div');
+  for (const p of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'whiteSpace', 'wordWrap', 'paddingTop', 'paddingLeft']) {
+    div.style[p] = cs[p];
+  }
+  div.style.boxSizing = 'content-box';
+  div.style.position = 'fixed';
+  div.style.visibility = 'hidden';
+  div.style.left = r.left + 'px';
+  div.style.top = r.top + 'px';
+  div.style.width = (el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) + 'px';
+  div.textContent = el.value.substring(0, el.selectionStart);
+  const span = document.createElement('span');
+  span.textContent = '\u200b';
+  div.appendChild(span);
+  document.body.appendChild(div);
+  const sr = span.getBoundingClientRect();
+  const left = sr.left, top = sr.top + sr.height;
+  div.remove();
+  return { left, top };
+}
+
+function lineToken(el) {
+  const v = el.value, caret = el.selectionStart;
+  const lineStart = v.lastIndexOf('\n', caret - 1) + 1;
+  let lineEnd = v.indexOf('\n', caret);
+  if (lineEnd < 0) lineEnd = v.length;
+  const before = v.slice(lineStart, caret);
+  const after = v.slice(caret, lineEnd);
+  let tokenStart = 0;
+  for (const ch of [' ', '|', '=', '*']) {
+    const i = before.lastIndexOf(ch);
+    if (i + 1 > tokenStart) tokenStart = i + 1;
+  }
+  return { caret, lineStart, lineEnd, before, after, tokenStart: lineStart + tokenStart, token: before.slice(tokenStart) };
+}
+
+function candidatesFor(el, tk) {
+  const token = tk.token.toLowerCase();
+  const out = [];
+  // 收集候选：list 为原始 id（不含前缀），key 为用于过滤的输入片段（已去掉类型前缀）
+  const add = (list, prefix, hint, key) => {
+    const k = (key === undefined ? token : key).toLowerCase();
+    for (const id of list) {
+      if (id.toLowerCase().includes(k)) out.push({ value: prefix + id, hint, key: k });
+    }
+  };
+
+  if (el.id === 'fUnlocks' || el.id === 'fWhitelist') {
+    if (token.startsWith('recipe:')) add(ALL_RECIPES, 'recipe:', '配方', token.slice(7));
+    else if (token.startsWith('item:')) add(ALL_ITEMS, 'item:', '物品', token.slice(5));
+    else { add(ALL_RECIPES, '', '配方'); add(ALL_ITEMS, '', '物品'); }
+  } else if (el.id === 'fTriggers' || el.id === 'fShowWhen') {
+    const type = TRIGGER_TYPES.find(t => token.startsWith(t + ':'));
+    if (type) {
+      const key = token.slice(type.length + 1);
+      if (type === 'dimension') {
+        add(['minecraft:overworld', 'minecraft:the_nether', 'minecraft:the_end'], type + ':', '维度', key);
+      } else {
+        add(ALL_ITEMS, type + ':', type === 'block_break' ? '方块' : '物品', key);
+      }
+    } else {
+      for (const t of TRIGGER_TYPES) if ((t + ':').includes(token)) out.push({ value: t + ':', hint: '类型', key: token });
+      add(ALL_ITEMS, '', '物品');
+    }
+  } else if (el.id === 'fStructures') {
+    const pipe = tk.before.lastIndexOf('|');
+    if (pipe >= 0) add(ALL_ITEMS, '', '图标/角标');
+    else {
+      for (const p of STRUCTURE_PRESETS) if (p.toLowerCase().includes(token)) out.push({ value: p, hint: '结构', key: token });
+      add(ALL_ITEMS, '', '结构 id');
+    }
+  } else if (el.id === 'fEffects') {
+    const colons = (token.match(/:/g) || []).length;
+    if (colons === 0) {
+      for (const t of EFFECT_TYPES) if (t.includes(token)) out.push({ value: t + ':', hint: '效果', key: token });
+    } else if (colons >= 2) {
+      const key = token.slice(token.lastIndexOf(':') + 1);
+      add(ALL_ITEMS, '', '方块', key);
+    }
+  }
+
+  // 去重 + 精确前缀优先 + 短 id 优先
+  const seen = new Set();
+  return out
+    .filter(c => (seen.has(c.value) ? false : (seen.add(c.value), true)))
+    .sort((a, b) => {
+      const ka = a.key || '', kb = b.key || '';
+      const pa = a.value.toLowerCase().startsWith(ka) ? 0 : 1;
+      const pb = b.value.toLowerCase().startsWith(kb) ? 0 : 1;
+      return pa - pb || a.value.length - b.value.length || a.value.localeCompare(b.value);
+    })
+    .slice(0, 300);
+}
+
+function showSuggest(el, list, tk) {
+  if (!list.length) { hideSuggest(); return; }
+  suggestState = { el, list, tk, index: 0 };
+  suggestEl.innerHTML = '';
+  list.slice(0, 120).forEach((c, i) => {
+    const d = document.createElement('div');
+    d.textContent = c.value;
+    if (c.hint) { const em = document.createElement('em'); em.textContent = c.hint; d.appendChild(em); }
+    d.onmousedown = e => { e.preventDefault(); acceptSuggest(i); };
+    suggestEl.appendChild(d);
+  });
+  const pos = caretRect(el);
+  suggestEl.style.display = 'block';
+  suggestEl.style.left = Math.min(pos.left, window.innerWidth - 260) + 'px';
+  suggestEl.style.top = Math.min(pos.top + 2, window.innerHeight - 230) + 'px';
+  highlightSuggest(0);
+}
+
+function highlightSuggest(i) {
+  if (!suggestState) return;
+  suggestState.index = Math.max(0, Math.min(i, suggestState.list.length - 1));
+  [...suggestEl.children].forEach((d, k) => d.classList.toggle('sel', k === suggestState.index));
+  const sel = suggestEl.children[suggestState.index];
+  if (sel) sel.scrollIntoView({ block: 'nearest' });
+}
+
+function acceptSuggest(i) {
+  if (!suggestState) return;
+  const { el, list, tk } = suggestState;
+  const value = list[i !== undefined ? i : suggestState.index].value;
+  const head = el.value.slice(0, tk.tokenStart);
+  const tail = el.value.slice(tk.caret);
+  el.value = head + value + tail;
+  const pos = tk.tokenStart + value.length;
+  el.selectionStart = el.selectionEnd = pos;
+  hideSuggest();
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function attachLineSuggest(el) {
+  const refresh = () => {
+    if (document.activeElement !== el) return;
+    const tk = lineToken(el);
+    showSuggest(el, candidatesFor(el, tk), tk);
+  };
+  el.addEventListener('input', refresh);
+  el.addEventListener('click', refresh);
+  el.addEventListener('keyup', e => {
+    if (e.key === 'Escape' || e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Tab') return;
+    refresh();
+  });
+  el.addEventListener('blur', () => setTimeout(hideSuggest, 120));
+  el.addEventListener('keydown', e => {
+    // Shift+Enter 保留为换行；此时只收起候选框
+    if (e.key === 'Enter' && e.shiftKey) { hideSuggest(); return; }
+    if (!suggestState || suggestState.el !== el) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); highlightSuggest(suggestState.index + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); highlightSuggest(suggestState.index - 1); }
+    else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); acceptSuggest(); }
+    else if (e.key === 'Escape') { e.preventDefault(); hideSuggest(); }
+  });
+}
+
+/* ---------- 工具 ---------- */
+const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
+const str = (v, d) => (typeof v === 'string' ? v : d);
+
+/* 数值型效果与文本行互转：mining_speed:0.15 / reach:1.0 / place_limit:8:minecraft:torch */
+function effectsToLines(list) {
+  return list.map(e => {
+    const parts = [e.type, e.amount];
+    if (e.block) parts.push(e.block);
+    return parts.join(':');
+  }).join('\n');
+}
+
+function linesToEffects(text) {
+  const result = [];
+  for (const line of text.split('\n')) {
+    const parts = line.trim().split(':');
+    if (parts.length < 2) continue;
+    const type = parts[0].trim();
+    if (!type) continue;
+    const amount = parseFloat(parts[1]);
+    if (!isFinite(amount) || amount === 0) continue;
+    const effect = { type, amount };
+    if (parts.length > 2) {
+      const block = parts.slice(2).join(':').trim();
+      if (block) effect.block = block;
+    }
+    result.push(effect);
+  }
+  return result;
+}
+
+function fileId(file) {
+  return 'sciencepacks:' + file.name.replace(/\.json$/i, '');
+}
+
+function resize() {
+  const r = wrap.getBoundingClientRect();
+  CV.width = Math.floor(r.width * devicePixelRatio);
+  CV.height = Math.floor(r.height * devicePixelRatio);
+  CV.style.width = r.width + 'px';
+  CV.style.height = r.height + 'px';
+  CTX.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+/* ---------- 绘制 ---------- */
+const CELL = 120, NODE = 62;
+
+/* 物品图标：tools/icons/<命名空间>/<路径>.png，由 tools/gen-icons.ps1 从本地 jar 导出 */
+const ICON_CACHE = new Map();
+function iconFor(itemId) {
+  const id = str(itemId, '').replace(/^(item|recipe):/, '').trim();
+  if (!id || id.indexOf(':') < 1) return null;
+  let entry = ICON_CACHE.get(id);
+  if (!entry) {
+    const img = new Image();
+    entry = { img, failed: false };
+    img.onload = () => { if (typeof draw === 'function') draw(); };
+    img.onerror = () => { entry.failed = true; };
+    img.src = 'icons/' + id.replace(':', '/') + '.png';
+    ICON_CACHE.set(id, entry);
+  }
+  if (entry.failed) return null;
+  return (entry.img.complete && entry.img.naturalWidth > 0) ? entry.img : null;
+}
+
+/* ---------- 多方块结构外观预览（与游戏内效果栏一致：大图标 + 右下角角标） ---------- */
+const STRUCTURE_NAMES = {
+  nether_portal: '下界传送门', end_portal: '末地传送门', wither: '凋灵',
+  iron_golem: '铁傀儡', snow_golem: '雪傀儡', beacon: '信标', conduit: '潮涌核心'
+};
+const STRUCTURE_ICONS = {
+  nether_portal: 'minecraft:obsidian', end_portal: 'minecraft:end_portal_frame',
+  wither: 'minecraft:wither_skeleton_skull', iron_golem: 'minecraft:carved_pumpkin',
+  snow_golem: 'minecraft:carved_pumpkin', beacon: 'minecraft:beacon', conduit: 'minecraft:conduit'
+};
+const STRUCTURE_BADGES = {
+  nether_portal: 'minecraft:flint_and_steel', end_portal: 'minecraft:ender_eye',
+  wither: 'minecraft:soul_sand', iron_golem: 'minecraft:iron_block',
+  snow_golem: 'minecraft:snow_block', beacon: 'minecraft:nether_star', conduit: 'minecraft:prismarine_shard'
+};
+
+/* 解析 "核心id|大图标物品|显示名称|小角标物品"，省略的段按内置规则补 */
+function structureAppearance(spec) {
+  const parts = String(spec).split('|').map(s => s.trim());
+  const core = parts[0] || '';
+  const key = core.replace(/^(dimension|entity|item_on_block):/, '');
+  const kind = core.startsWith('dimension:') ? 'dimension'
+    : core.startsWith('entity:') ? 'entity'
+    : core.startsWith('item_on_block:') ? 'item_on_block' : 'builtin';
+  let icon = parts[1] || STRUCTURE_ICONS[key] || '';
+  let badge = parts[3] || STRUCTURE_BADGES[key] || '';
+  let name = parts[2] || STRUCTURE_NAMES[key] || '';
+  if (!icon) {
+    icon = kind === 'dimension' ? 'minecraft:obsidian'
+      : kind === 'entity' ? 'minecraft:wither_skeleton_skull'
+      : kind === 'item_on_block' ? 'minecraft:flint_and_steel' : 'minecraft:barrier';
+  }
+  if (!badge) {
+    badge = kind === 'dimension' ? 'minecraft:ender_eye'
+      : kind === 'entity' ? 'minecraft:rotten_flesh'
+      : kind === 'item_on_block' ? 'minecraft:flint_and_steel' : '';
+  }
+  if (!name) {
+    name = kind === 'dimension' ? '维度：' + key
+      : kind === 'entity' ? '实体：' + key
+      : kind === 'item_on_block' ? '放置 / 使用：' + key
+      : core;
+  }
+  return { core, icon, badge, name };
+}
+
+function renderStructPreview() {
+  const box = $('structPreview');
+  if (!box) return;
+  box.innerHTML = '';
+  const file = selected;
+  const list = file ? (file.data.structures || []) : [];
+  if (!list.length) {
+    box.innerHTML = '<span style="font-size:11px;color:#66666e">（这个研究还没有多方块结构）</span>';
+    return;
+  }
+  for (const spec of list) {
+    const ap = structureAppearance(spec);
+    const cell = document.createElement('div');
+    cell.className = 'sp-cell';
+    const iconBox = document.createElement('div');
+    iconBox.className = 'sp-icon';
+    const img = iconFor(ap.icon);
+    if (img) {
+      const el = document.createElement('img');
+      el.src = img.src;
+      iconBox.appendChild(el);
+    } else {
+      const fallback = document.createElement('span');
+      fallback.style.cssText = 'font-size:9px;color:#8a8a94;padding:2px';
+      fallback.textContent = ap.icon.replace('minecraft:', '');
+      iconBox.appendChild(fallback);
+    }
+    if (ap.badge) {
+      const b = document.createElement('div');
+      b.className = 'sp-badge';
+      const bimg = iconFor(ap.badge);
+      if (bimg) {
+        const el = document.createElement('img');
+        el.src = bimg.src;
+        b.appendChild(el);
+      }
+      iconBox.appendChild(b);
+    }
+    const label = document.createElement('div');
+    label.className = 'sp-name';
+    label.title = spec;
+    label.textContent = ap.name;
+    cell.appendChild(iconBox);
+    cell.appendChild(label);
+    box.appendChild(cell);
+  }
+}
+
+/* 研究里引用到的模组命名空间（minecraft / sciencepacks 之外） */
+const BASE_NAMESPACES = new Set(['minecraft', 'sciencepacks']);
+function modNamespacesOf(file) {
+  const found = new Set();
+  const data = file.data;
+  const add = (id) => {
+    if (!id) return;
+    const clean = String(id).replace(/^(item|recipe):/, '').trim();
+    const i = clean.indexOf(':');
+    if (i > 0) {
+      const ns = clean.slice(0, i);
+      if (!BASE_NAMESPACES.has(ns)) found.add(ns);
+    }
+  };
+  add(data.icon);
+  (data.unlocks || []).forEach(add);
+  (data.cost || []).forEach(c => add(c.item));
+  return found;
+}
+
+/* 顶部提示：整棵树依赖哪些模组；以及哪些条目用了模组物品却没写「所需模组」 */
+function refreshModBanner() {
+  const banner = $('modBanner');
+  if (!banner) return;
+  const counts = new Map();
+  const missing = [];
+  for (const file of files) {
+    const declared = new Set((file.data.requiredMods || [])
+      .map(m => String(m).replace(/^!/, '').trim()).filter(Boolean));
+    for (const mod of declared) counts.set(mod, (counts.get(mod) || 0) + 1);
+    for (const ns of modNamespacesOf(file)) {
+      if (!declared.has(ns)) missing.push(fileId(file) + ' → ' + ns);
+    }
+  }
+  const parts = [];
+  if (counts.size) {
+    const list = Array.from(counts.entries()).map(([mod, n]) => mod + ' ×' + n).join('、');
+    parts.push('需要模组：' + list);
+  }
+  if (missing.length) {
+    parts.push('<span class="warn">未声明：' + missing.slice(0, 6).join('、')
+      + (missing.length > 6 ? ' 等 ' + missing.length + ' 项' : '') + '</span>');
+  }
+  if (!parts.length) {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+    return;
+  }
+  banner.style.display = '';
+  banner.innerHTML = parts.join('　·　');
+}
+
+function nodeXY(file) {
+  return { x: offsetX + num(file.data.x, 0) * CELL, y: offsetY + num(file.data.y, 0) * CELL };
+}
+
+/* 水平线 y 是否压到无关研究的节点（连线避让用） */
+function hBlocked(y, xa, xb, ignoreA, ignoreB) {
+  const left = Math.min(xa, xb), right = Math.max(xa, xb);
+  for (const file of files) {
+    if (file === ignoreA || file === ignoreB) continue;
+    const p = nodeXY(file);
+    if (right < p.x || left > p.x + NODE) continue;
+    if (y > p.y + 2 && y < p.y + NODE - 2) return true;
+  }
+  return false;
+}
+
+/* 选一条不压无关节点的折线路由高度；找不到就退回中线 */
+function clearRouteY(x1, y1, x2, y2, parent, child) {
+  const mid = (y1 + y2) / 2;
+  if (x1 === x2) return mid;
+  const lo = Math.min(y1, y2), hi = Math.max(y1, y2);
+  if (!hBlocked(mid, x1, x2, parent, child)) return mid;
+  for (let k = 1; k <= 14; k++) {
+    for (const cand of [mid + k * 12, mid - k * 12]) {
+      if (cand <= lo + 6 || cand >= hi - 6) continue;
+      if (!hBlocked(cand, x1, x2, parent, child)) return cand;
+    }
+  }
+  return mid;
+}
+
+function draw() {
+  const w = CV.width / devicePixelRatio, h = CV.height / devicePixelRatio;
+  CTX.clearRect(0, 0, w, h);
+  // 网格
+  CTX.strokeStyle = '#1d1d24';
+  CTX.lineWidth = 1;
+  for (let x = offsetX % CELL; x < w; x += CELL) {
+    CTX.beginPath(); CTX.moveTo(x, 0); CTX.lineTo(x, h); CTX.stroke();
+  }
+  for (let y = offsetY % CELL; y < h; y += CELL) {
+    CTX.beginPath(); CTX.moveTo(0, y); CTX.lineTo(w, y); CTX.stroke();
+  }
+
+  // 连线（绕开无关研究的节点）
+  CTX.strokeStyle = '#55555f';
+  CTX.lineWidth = 2;
+  for (const file of files) {
+    const to = nodeXY(file);
+    if (file.data.root) continue; // 根研究不画入线
+    for (const pid of (file.data.prerequisites || [])) {
+      const parent = byId.get(pid);
+      if (!parent) continue;
+      const from = nodeXY(parent);
+      const x1 = from.x + NODE / 2, y1 = from.y + NODE;
+      const x2 = to.x + NODE / 2, y2 = to.y;
+      const routeY = clearRouteY(x1, y1, x2, y2, parent, file);
+      CTX.beginPath();
+      CTX.moveTo(x1, y1);
+      if (x1 === x2) { CTX.lineTo(x2, y2); }
+      else { CTX.lineTo(x1, routeY); CTX.lineTo(x2, routeY); CTX.lineTo(x2, y2); }
+      CTX.stroke();
+    }
+  }
+
+  // 节点
+  for (const file of files) {
+    const p = nodeXY(file);
+    const isSel = selected === file;
+    // 模组条件标签：画在节点上方，提示「需要 xx 模组」
+    const mods = (file.data.requiredMods || []).map(m => String(m).replace(/^!/, '')).filter(Boolean);
+    if (mods.length) {
+      const label = '需要 ' + mods.join('/') + (String(file.data.requiredMods[0]).startsWith('!') ? ' 以外' : '');
+      CTX.font = '10px "Segoe UI", "Microsoft YaHei", sans-serif';
+      const tw = CTX.measureText(label).width;
+      CTX.fillStyle = 'rgba(60, 44, 16, 0.92)';
+      CTX.fillRect(p.x + (NODE - tw - 10) / 2, p.y - 15, tw + 10, 14);
+      CTX.strokeStyle = '#6a5320';
+      CTX.lineWidth = 1;
+      CTX.strokeRect(p.x + (NODE - tw - 10) / 2 + 0.5, p.y - 14.5, tw + 9, 13);
+      CTX.fillStyle = '#e8b44a';
+      CTX.textAlign = 'center';
+      CTX.fillText(label, p.x + NODE / 2, p.y - 5);
+    }
+    CTX.fillStyle = isSel ? '#3a2f1c' : '#262630';
+    CTX.fillRect(p.x, p.y, NODE, NODE);
+    CTX.strokeStyle = file.data.root ? '#5fae7a' : (isSel ? '#e8b44a' : '#3d3d48');
+    CTX.lineWidth = file.data.root || isSel ? 2 : 1;
+    CTX.strokeRect(p.x + 0.5, p.y + 0.5, NODE - 1, NODE - 1);
+    if (file.data.root) {
+      // 根研究标记：左上角绿色「根」
+      CTX.fillStyle = 'rgba(40, 84, 58, 0.95)';
+      CTX.fillRect(p.x - 1, p.y - 1, 18, 14);
+      CTX.fillStyle = '#8fe0aa';
+      CTX.font = '10px "Microsoft YaHei", sans-serif';
+      CTX.textAlign = 'center';
+      CTX.fillText('根', p.x + 8, p.y + 10);
+    }
+
+    const iconImg = iconFor(file.data.icon);
+    if (iconImg) {
+      CTX.imageSmoothingEnabled = false;
+      CTX.drawImage(iconImg, p.x + (NODE - 28) / 2, p.y + 4, 28, 28);
+    }
+    CTX.fillStyle = '#e6e6e6';
+    CTX.font = '11px "Segoe UI", "Microsoft YaHei", sans-serif';
+    CTX.textAlign = 'center';
+    const name = str(file.data.name, file.name);
+    CTX.fillText(name.length > 7 ? name.slice(0, 7) + '…' : name, p.x + NODE / 2, p.y + (iconImg ? 48 : 30));
+    if (!iconImg) {
+      CTX.fillStyle = '#77777f';
+      CTX.font = '10px monospace';
+      const icon = str(file.data.icon, '');
+      CTX.fillText(icon.replace('minecraft:', '').slice(0, 12), p.x + NODE / 2, p.y + 44);
+    }
+    if ((file.data.cost || []).length) {
+      const perRound = file.data.cost.reduce((s, c) => s + (c.count || 0), 0);
+      const rounds = Math.max(1, num(file.data.rounds, 1));
+      CTX.fillStyle = '#e8b44a';
+      CTX.font = '10px monospace';
+      CTX.fillText(perRound + '×' + rounds, p.x + NODE / 2, p.y + NODE - 6);
+    }
+  }
+  CTX.textAlign = 'left';
+  refreshModBanner();
+}
+
+/* ---------- 交互 ---------- */
+function hit(mx, my) {
+  for (let i = files.length - 1; i >= 0; i--) {
+    const p = nodeXY(files[i]);
+    if (mx >= p.x && mx <= p.x + NODE && my >= p.y && my <= p.y + NODE) return files[i];
+  }
+  return null;
+}
+
+CV.addEventListener('mousedown', e => {
+  const r = CV.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const f = hit(mx, my);
+  moved = false;
+  if (f) {
+    select(f);
+    const p = nodeXY(f);
+    dragging = { file: f, dx: mx - p.x, dy: my - p.y };
+    CV.classList.add('dragging');
+  } else {
+    panning = { x: mx, y: my, ox: offsetX, oy: offsetY };
+  }
+});
+
+CV.addEventListener('mousemove', e => {
+  const r = CV.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  if (dragging) {
+    if (!moved) pushHistory();
+    moved = true;
+    const gx = Math.round((mx - dragging.dx - offsetX) / CELL);
+    const gy = Math.round((my - dragging.dy - offsetY) / CELL);
+    dragging.file.data.x = gx;
+    dragging.file.data.y = gy;
+    draw();
+  } else if (panning) {
+    moved = true;
+    offsetX = panning.ox + (mx - panning.x);
+    offsetY = panning.oy + (my - panning.y);
+    draw();
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  dragging = null;
+  panning = null;
+  CV.classList.remove('dragging');
+  if (moved) syncForm();
+});
+
+CV.addEventListener('dblclick', () => {
+  offsetX = 60; offsetY = 40;
+  draw();
+});
+
+CV.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+  const r = CV.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  offsetX = mx - (mx - offsetX) * factor;
+  offsetY = my - (my - offsetY) * factor;
+  CELL_ZOOM(factor);
+  draw();
+}, { passive: false });
+
+let cellZoom = 1;
+function CELL_ZOOM(f) {
+  cellZoom *= f;
+  // 简单起见只缩放偏移，保持网格密度不变
+}
+
+/* ---------- 表单 ---------- */
+const $ = id => document.getElementById(id);
+
+function select(file) {
+  selected = file;
+  $('empty').style.display = 'none';
+  $('form').style.display = 'block';
+  $('formTitle').textContent = fileId(file);
+  $('fName').value = str(file.data.name, '');
+  $('fDesc').value = str(file.data.description, '');
+  $('fIcon').value = str(file.data.icon, '');
+  $('fCategory').value = str(file.data.category, '');
+  $('fRequiredMods').value = (file.data.requiredMods || []).join('; ');
+  $('fExcludes').value = (file.data.excludes || []).join('; ');
+  $('fTime').value = num(file.data.researchTime, 0);
+  $('fRounds').value = num(file.data.rounds, 1);
+  $('fX').value = num(file.data.x, 0);
+  $('fY').value = num(file.data.y, 0);
+  $('fTriggers').value = (file.data.triggers || []).join('\n');
+  $('fUnlocks').value = (file.data.unlocks || []).join('\n');
+  $('fStructures').value = (file.data.structures || []).join('\n');
+  renderStructPreview();
+  $('fWhitelist').value = (file.data.whitelist || []).join('\n');
+  $('fHidden').checked = !!file.data.hidden;
+  $('fRoot').checked = !!file.data.root;
+  $('fShowWhen').value = (file.data.showWhen || []).join('\n');
+  $('fInfinite').checked = !!file.data.infinite;
+  $('fMaxLevel').value = num(file.data.maxLevel, 0);
+  $('fCostMultiplier').value = num(file.data.costMultiplier, 2);
+  $('fEffects').value = effectsToLines(file.data.effects || []);
+  $('fPrereqSearch').value = '';
+  renderPrereqs();
+  renderCosts();
+  draw();
+}
+
+function syncForm() {
+  if (!selected) return;
+  $('fX').value = num(selected.data.x, 0);
+  $('fY').value = num(selected.data.y, 0);
+}
+
+function renderPrereqs() {
+  const box = $('fPrereq');
+  box.innerHTML = '';
+  if (selected && selected.data.root) {
+    const note = document.createElement('div');
+    note.className = 'hint';
+    note.style.color = '#8fe0aa';
+    note.textContent = '这是根研究：下面前置不会生效，也不会画入线。';
+    box.appendChild(note);
+  }
+  const keyword = str($('fPrereqSearch').value, '').trim().toLowerCase();
+  const shown = files.filter(file => file !== selected).filter(file => {
+    if (!keyword) return true;
+    const hay = (fileId(file) + ' ' + str(file.data.name, '')).toLowerCase();
+    return hay.includes(keyword);
+  });
+  // 已选中的排在前面，方便取消
+  shown.sort((a, b) => {
+    const pa = (selected.data.prerequisites || []).includes(fileId(a)) ? 0 : 1;
+    const pb = (selected.data.prerequisites || []).includes(fileId(b)) ? 0 : 1;
+    return pa - pb || fileId(a).localeCompare(fileId(b));
+  });
+  for (const file of shown) {
+    const id = fileId(file);
+    const on = (selected.data.prerequisites || []).includes(id);
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (on ? ' on' : '');
+    chip.textContent = str(file.data.name, file.name);
+    chip.title = id;
+    chip.onclick = () => {
+      pushHistory();
+      const list = selected.data.prerequisites || [];
+      const i = list.indexOf(id);
+      if (i >= 0) list.splice(i, 1); else list.push(id);
+      selected.data.prerequisites = list;
+      renderPrereqs();
+      draw();
+    };
+    box.appendChild(chip);
+  }
+  if (!shown.length) {
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = keyword ? '没有匹配的研究' : '没有可用的前置研究';
+    box.appendChild(hint);
+  }
+}
+
+$('fPrereqSearch').oninput = () => { if (selected) renderPrereqs(); };
+
+const PACK_COLORS = {
+  'sciencepacks:pack_red': ['#c23a3a', '铁质'],
+  'sciencepacks:pack_green': ['#3fae5a', '物流'],
+  'sciencepacks:pack_blue': ['#3a6fd8', '红石'],
+  'sciencepacks:pack_purple': ['#8b4fd8', '末影'],
+  'sciencepacks:pack_gray': ['#8c8c96', '军备'],
+  'sciencepacks:pack_yellow': ['#d8b23a', '效能']
+};
+
+function renderQuick() {
+  const box = $('fQuick');
+  box.innerHTML = '';
+  for (const [id, info] of Object.entries(PACK_COLORS)) {
+    const button = document.createElement('button');
+    button.textContent = info[1];
+    button.style.borderColor = info[0];
+    button.style.color = info[0];
+    button.title = '添加 ' + info[1] + '科技包（' + id + '）';
+    button.onclick = () => addCost(id);
+    box.appendChild(button);
+  }
+  const custom = document.createElement('button');
+  custom.textContent = '+ 自定义';
+  custom.title = '输入任意物品 id 作为研究材料';
+  custom.onclick = () => addCost('');
+  box.appendChild(custom);
+}
+
+function addCost(item) {
+  if (!selected) return;
+  pushHistory();
+  const costs = selected.data.cost || (selected.data.cost = []);
+  const existing = item && costs.find(c => c.item === item);
+  if (existing) existing.count = num(existing.count, 1) + 1;
+  else costs.push({ item, count: 1 });
+  renderCosts();
+  draw();
+}
+
+function renderCosts() {
+  const box = $('fCosts');
+  box.innerHTML = '';
+  const costs = selected.data.cost || (selected.data.cost = []);
+  costs.forEach((cost, index) => {
+    const row = document.createElement('div');
+    row.className = 'cost-row';
+    const item = document.createElement('input');
+    item.value = str(cost.item, '');
+    item.placeholder = 'item id';
+    item.setAttribute('list', 'itemList');
+    item.onfocus = () => pushHistory();
+    item.oninput = () => cost.item = item.value.trim();
+    const count = document.createElement('input');
+    count.type = 'number'; count.min = 1; count.value = num(cost.count, 1);
+    count.title = '每轮消耗数量';
+    count.onfocus = () => pushHistory();
+    count.oninput = () => cost.count = Math.max(1, parseInt(count.value || '1', 10));
+
+    const del = document.createElement('button');
+    del.textContent = '×';
+    del.onclick = () => { pushHistory(); costs.splice(index, 1); renderCosts(); draw(); };
+    row.append(item, count, del);
+    box.appendChild(row);
+  });
+  if (!costs.length) {
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = '没有材料 = 免费/触发科技';
+    box.appendChild(hint);
+  }
+  renderQuick();
+}
+
+$('btnAddCost').onclick = () => {
+  if (!selected) return;
+  pushHistory();
+  (selected.data.cost || (selected.data.cost = [])).push({ item: 'sciencepacks:pack_red', count: 1 });
+  renderCosts();
+  draw();
+};
+
+/* ---------- 配方选择弹窗 ---------- */
+let recipePicked = new Set();
+
+function openRecipePicker() {
+  if (!selected) { alert('先选中一个研究。'); return; }
+  recipePicked = new Set();
+  $('recipeSearch').value = '';
+  renderRecipePicker();
+  $('recipeModal').style.display = 'flex';
+  $('recipeSearch').focus();
+}
+
+function closeRecipePicker() { $('recipeModal').style.display = 'none'; }
+
+function renderRecipePicker() {
+  const list = $('recipeList');
+  list.innerHTML = '';
+  const keyword = $('recipeSearch').value.trim().toLowerCase();
+  const hits = ALL_RECIPES.filter(id => !keyword || id.toLowerCase().includes(keyword)).slice(0, 500);
+  if (!ALL_RECIPES.length) {
+    list.innerHTML = '<div class="hint">配方清单为空。点顶部「导入配方清单」选择 /sciencepacks dumprecipes 导出的 JSON。</div>';
+    return;
+  }
+  if (!hits.length) {
+    list.innerHTML = '<div class="hint">没有匹配的配方 id。</div>';
+    return;
+  }
+  for (const id of hits) {
+    const row = document.createElement('div');
+    row.textContent = id;
+    row.className = recipePicked.has(id) ? 'on' : '';
+    row.onclick = () => {
+      if (recipePicked.has(id)) recipePicked.delete(id); else recipePicked.add(id);
+      row.className = recipePicked.has(id) ? 'on' : '';
+    };
+    row.ondblclick = () => { recipePicked.add(id); addPickedRecipes(); };
+    list.appendChild(row);
+  }
+  $('recipeHint').textContent = '已载入 ' + ALL_RECIPES.length + ' 个配方 id；点击选中（可多选），双击直接加入。';
+}
+
+function addPickedRecipes() {
+  if (!selected || !recipePicked.size) return;
+  pushHistory();
+  const unlocks = selected.data.unlocks || (selected.data.unlocks = []);
+  let added = 0;
+  for (const id of recipePicked) {
+    if (!unlocks.includes(id)) { unlocks.push(id); added++; }
+  }
+  $('fUnlocks').value = unlocks.join('\n');
+  renderCosts();
+  draw();
+  closeRecipePicker();
+  statusEl.textContent = added ? ('已加入 ' + added + ' 个解锁配方') : '这些配方已经在解锁列表里';
+}
+
+$('recipeSearch').oninput = renderRecipePicker;
+$('recipeAdd').onclick = addPickedRecipes;
+$('recipeClose').onclick = closeRecipePicker;
+$('recipeModal').addEventListener('mousedown', e => { if (e.target.id === 'recipeModal') closeRecipePicker(); });
+$('btnPickRecipe').onclick = openRecipePicker;
+$('btnImportRecipes').onclick = importRecipes;
+
+/* 多行列表框：一行一个，也支持用分号分隔 */
+const splitList = v => v.split(/[\n;]/).map(s => s.trim()).filter(Boolean);
+
+const bind = (id, fn) => {
+  const el = $(id);
+  el.onfocus = () => pushHistory();
+  el.oninput = () => { if (selected) { fn(el.value); draw(); } };
+};
+bind('fName', v => selected.data.name = v);
+bind('fDesc', v => selected.data.description = v);
+bind('fIcon', v => selected.data.icon = v.trim());
+bind('fCategory', v => selected.data.category = v.trim());
+bind('fRequiredMods', v => {
+  const list = splitList(v);
+  if (list.length) selected.data.requiredMods = list; else delete selected.data.requiredMods;
+});
+bind('fExcludes', v => {
+  const list = splitList(v);
+  if (list.length) selected.data.excludes = list; else delete selected.data.excludes;
+});
+bind('fTime', v => selected.data.researchTime = Math.max(0, parseInt(v || '0', 10)));
+bind('fRounds', v => selected.data.rounds = Math.max(1, parseInt(v || '1', 10)));
+bind('fX', v => selected.data.x = parseInt(v || '0', 10));
+bind('fY', v => selected.data.y = parseInt(v || '0', 10));
+bind('fTriggers', v => selected.data.triggers = splitList(v));
+bind('fUnlocks', v => selected.data.unlocks = splitList(v));
+bind('fStructures', v => { selected.data.structures = splitList(v); renderStructPreview(); });
+bind('fWhitelist', v => selected.data.whitelist = splitList(v));
+bind('fShowWhen', v => selected.data.showWhen = splitList(v));
+bind('fMaxLevel', v => {
+  const level = Math.max(0, parseInt(v || '0', 10));
+  if (level > 0) selected.data.maxLevel = level; else delete selected.data.maxLevel;
+});
+bind('fCostMultiplier', v => {
+  const multiplier = Math.max(1, parseFloat(v || '2'));
+  if (multiplier > 1) selected.data.costMultiplier = multiplier; else delete selected.data.costMultiplier;
+});
+bind('fEffects', v => {
+  const list = linesToEffects(v);
+  if (list.length) selected.data.effects = list; else delete selected.data.effects;
+});
+$('fInfinite').addEventListener('change', e => {
+  if (!selected) return;
+  pushHistory();
+  if (e.target.checked) selected.data.infinite = true; else delete selected.data.infinite;
+  draw();
+});
+$('fHidden').addEventListener('change', e => {
+  if (!selected) return;
+  pushHistory();
+  if (e.target.checked) selected.data.hidden = true; else delete selected.data.hidden;
+  draw();
+});
+/* 根研究：勾选时清空前置（根研究不依赖前置），并在节点上画「根」标记 */
+$('fRoot').addEventListener('change', e => {
+  if (!selected) return;
+  pushHistory();
+  if (e.target.checked) {
+    selected.data.root = true;
+    if ((selected.data.prerequisites || []).length) {
+      selected.data.prerequisites = [];
+      renderPrereqs();
+      statusEl.textContent = '已设为根研究：前置已清空（Ctrl+Z 可撤销）';
+    }
+  } else {
+    delete selected.data.root;
+  }
+  draw();
+});
+
+/* ---------- 标题旁的 ? 简介气泡 ---------- */
+const tipEl = document.getElementById('tip');
+
+function placeTip(x, y) {
+  const r = tipEl.getBoundingClientRect();
+  tipEl.style.left = Math.max(8, Math.min(x + 14, window.innerWidth - r.width - 8)) + 'px';
+  tipEl.style.top = Math.max(8, Math.min(y + 16, window.innerHeight - r.height - 8)) + 'px';
+  tipEl.style.display = 'block';
+}
+
+document.addEventListener('mouseover', e => {
+  const q = e.target && e.target.closest ? e.target.closest('.q') : null;
+  if (!q) return;
+  tipEl.textContent = q.getAttribute('data-tip') || '';
+  placeTip(e.clientX, e.clientY);
+});
+document.addEventListener('mousemove', e => {
+  if (tipEl.style.display === 'block') placeTip(e.clientX, e.clientY);
+});
+document.addEventListener('mouseout', e => {
+  const q = e.target && e.target.closest ? e.target.closest('.q') : null;
+  if (q) tipEl.style.display = 'none';
+});
+
+/* ---------- 撤销 / 重做 ---------- */
+function clone(v) { return JSON.parse(JSON.stringify(v)); }
+
+function captureState() {
+  return {
+    files: files.map(f => ({ name: f.name, data: clone(f.data) })),
+    selectedId: selected ? fileId(selected) : null
+  };
+}
+
+function pushHistory() {
+  const snap = captureState();
+  const last = undoStack[undoStack.length - 1];
+  if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
+  undoStack.push(snap);
+  if (undoStack.length > MAX_HISTORY) undoStack.shift();
+  redoStack = [];
+  updateHistoryButtons();
+}
+
+function restoreState(s) {
+  const old = new Map(files.map(f => [f.name, f]));
+  files = s.files.map(x => {
+    const prev = old.get(x.name);
+    if (prev) { prev.data = x.data; return prev; }
+    return { name: x.name, handle: null, data: x.data };
+  });
+  byId = new Map(files.map(f => [fileId(f), f]));
+  selected = files.find(f => fileId(f) === s.selectedId) || files[0] || null;
+  if (selected) { select(selected); }
+  else { $('empty').style.display = 'block'; $('form').style.display = 'none'; }
+  draw();
+  updateHistoryButtons();
+  statusEl.textContent = `已恢复（可撤销 ${undoStack.length} / 可重做 ${redoStack.length}）`;
+}
+
+function undo() { if (!undoStack.length) return; redoStack.push(captureState()); restoreState(undoStack.pop()); }
+function redo() { if (!redoStack.length) return; undoStack.push(captureState()); restoreState(redoStack.pop()); }
+
+function updateHistoryButtons() {
+  $('btnUndo').disabled = !undoStack.length;
+  $('btnRedo').disabled = !redoStack.length;
+}
+
+/* ---------- 新建 / 复制 / 删除研究 ---------- */
+function uniqueName(base) {
+  let name = base, i = 2;
+  while (files.some(f => f.name === name + '.json')) name = base + '_' + i++;
+  return name;
+}
+
+function nextPosition() {
+  const w = CV.width / devicePixelRatio, h = CV.height / devicePixelRatio;
+  let gx = Math.round((w / 2 - offsetX) / CELL);
+  let gy = Math.round((h / 2 - offsetY) / CELL);
+  const used = new Set(files.map(f => num(f.data.x, 0) + ',' + num(f.data.y, 0)));
+  const startX = gx;
+  while (used.has(gx + ',' + gy)) {
+    gx++;
+    if (gx - startX > 40) { gy++; gx = startX; }
+  }
+  return { x: gx, y: gy };
+}
+
+async function newTech() {
+  if (!files.length && !dirHandle) {
+    alert('先点「打开 technologies 文件夹」，这样新建的 JSON 能直接写回；\n或者先用「选择 JSON 文件」加载，再「导出全部」。');
+    return;
+  }
+  pushHistory();
+  const name = uniqueName('new_tech') + '.json';
+  const pos = nextPosition();
+  const file = {
+    name,
+    handle: null,
+    data: { name: '新研究', description: '', icon: 'minecraft:stone', x: pos.x, y: pos.y }
+  };
+  if (dirHandle) {
+    try {
+      file.handle = await dirHandle.getFileHandle(name, { create: true });
+      const w = await file.handle.createWritable();
+      await w.write(pretty(file));
+      await w.close();
+    } catch (e) { console.warn(e); }
+  }
+  files.push(file);
+  byId.set(fileId(file), file);
+  files.sort((a, b) => fileId(a).localeCompare(fileId(b)));
+  select(file);
+  draw();
+  statusEl.textContent = '已新建 ' + name + (file.handle ? '（已写入文件夹）' : '（没有文件句柄，请用「导出全部」）');
+}
+
+async function duplicateSelected() {
+  if (!selected) return;
+  pushHistory();
+  const src = selected;
+  const base = src.name.replace(/\.json$/i, '');
+  const name = uniqueName(base + '_copy') + '.json';
+  const data = clone(src.data);
+  data.name = str(src.data.name, base) + '（副本）';
+  data.x = num(data.x, 0) + 1;
+  const file = { name, handle: null, data };
+  if (dirHandle) {
+    try {
+      file.handle = await dirHandle.getFileHandle(name, { create: true });
+      const w = await file.handle.createWritable();
+      await w.write(pretty(file));
+      await w.close();
+    } catch (e) { console.warn(e); }
+  }
+  files.push(file);
+  byId.set(fileId(file), file);
+  files.sort((a, b) => fileId(a).localeCompare(fileId(b)));
+  select(file);
+  draw();
+  statusEl.textContent = '已复制为 ' + name;
+}
+
+async function deleteSelected() {
+  if (!selected) return;
+  const target = selected;
+  const id = fileId(target);
+  if (!confirm('删除研究 ' + id + ' ？\n\n会同时删掉文件，并从其它研究的前置列表里移除它。')) return;
+  pushHistory();
+  files = files.filter(f => f !== target);
+  byId.delete(id);
+  for (const other of files) {
+    const pre = other.data.prerequisites;
+    if (!Array.isArray(pre)) continue;
+    const i = pre.indexOf(id);
+    if (i >= 0) {
+      pre.splice(i, 1);
+      if (!pre.length) delete other.data.prerequisites;
+    }
+  }
+  if (target.handle && dirHandle) {
+    try { await dirHandle.removeEntry(target.name); } catch (e) { console.warn(e); }
+  }
+  selected = files[0] || null;
+  if (selected) { select(selected); }
+  else { $('empty').style.display = 'block'; $('form').style.display = 'none'; }
+  draw();
+  updateHistoryButtons();
+  statusEl.textContent = '已删除 ' + target.name;
+}
+
+/* ---------- 右键菜单 ---------- */
+const ctx = $('ctxMenu');
+
+function hideCtx() { ctx.style.display = 'none'; }
+
+function showCtx(x, y) {
+  ctx.innerHTML = '';
+  const add = (label, hint, fn, disabled) => {
+    const row = document.createElement('div');
+    row.textContent = label;
+    if (hint) { const s = document.createElement('span'); s.textContent = hint; row.appendChild(s); }
+    if (disabled) { row.style.opacity = '.4'; row.style.cursor = 'default'; }
+    else row.onclick = () => { hideCtx(); fn(); };
+    ctx.appendChild(row);
+  };
+  const sep = () => { const d = document.createElement('div'); d.className = 'sep'; ctx.appendChild(d); };
+  add('新建研究', 'N', () => newTech());
+  add('复制选中', '', () => duplicateSelected(), !selected);
+  add('删除选中', 'Del', () => deleteSelected(), !selected);
+  sep();
+  add('自动布局', '', () => autoLayout());
+  add('撤销', 'Ctrl+Z', () => undo(), !undoStack.length);
+  add('重做', 'Ctrl+Y', () => redo(), !redoStack.length);
+  sep();
+  add('导入物品清单', '', () => importItems());
+  ctx.style.display = 'block';
+  const w = ctx.offsetWidth, h = ctx.offsetHeight;
+  ctx.style.left = Math.min(x, window.innerWidth - w - 8) + 'px';
+  ctx.style.top = Math.min(y, window.innerHeight - h - 8) + 'px';
+}
+
+CV.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  const r = CV.getBoundingClientRect();
+  const f = hit(e.clientX - r.left, e.clientY - r.top);
+  if (f) { select(f); }
+  showCtx(e.clientX, e.clientY);
+});
+
+document.addEventListener('mousedown', e => {
+  if (!ctx.contains(e.target)) hideCtx();
+}, true);
+
+/* ---------- 导入物品清单 ---------- */
+function importItemsFromText(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    alert('读取失败：' + e);
+    return 0;
+  }
+  let ids = [];
+  if (Array.isArray(data)) ids = data;
+  else if (data && Array.isArray(data.items)) ids = data.items;
+  else if (data && typeof data === 'object') ids = Object.keys(data);
+  ids = ids.map(v => typeof v === 'string' ? v : (v && (v.id || v.item))).filter(v => typeof v === 'string' && v.includes(':'));
+  if (!ids.length) {
+    alert('这个 JSON 里没找到物品 id。\n支持 ["minecraft:stone", ...] 或 {"items":[...]} 两种格式。');
+    return 0;
+  }
+  const set = new Set(ALL_ITEMS);
+  for (const id of ids) set.add(id.trim());
+  ALL_ITEMS = [...set].sort();
+  saveImportedItems(ids.map(id => id.trim()));
+  rebuildItemList();
+  statusEl.textContent = '已导入 ' + ids.length + ' 个物品 id（当前可补全 ' + ALL_ITEMS.length + ' 个）';
+  return ids.length;
+}
+
+function importItems() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    importItemsFromText(await file.text());
+  };
+  input.click();
+}
+
+/* ---------- 键盘快捷键 ---------- */
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+  if (typing) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
+  if (e.key.toLowerCase() === 'n') { e.preventDefault(); newTech(); }
+});
+
+/* ---------- 自动布局 ---------- */
+function autoLayout() {
+  if (!files.length) return;
+  pushHistory();
+  // 计算每个科技的最长前置深度
+  const depth = new Map();
+  const visiting = new Set();
+  function d(file, stack) {
+    const id = fileId(file);
+    if (depth.has(id)) return depth.get(id);
+    if (stack.has(id)) return 0;
+    stack.add(id);
+    let max = 0;
+    for (const pid of (file.data.prerequisites || [])) {
+      const p = byId.get(pid);
+      if (p) max = Math.max(max, d(p, stack) + 1);
+    }
+    stack.delete(id);
+    depth.set(id, max);
+    return max;
+  }
+  const layers = new Map();
+  for (const file of files) {
+    const dd = d(file, new Set());
+    if (!layers.has(dd)) layers.set(dd, []);
+    layers.get(dd).push(file);
+  }
+  let maxCount = 0;
+  for (const [, list] of layers) maxCount = Math.max(maxCount, list.length);
+  for (const [dd, list] of layers) {
+    list.sort((a, b) => str(a.data.name, '').localeCompare(str(b.data.name, '')));
+    const start = -Math.floor(list.length / 2);
+    list.forEach((file, i) => {
+      file.data.x = start + i;
+      file.data.y = dd;
+    });
+  }
+  draw();
+  syncForm();
+  statusEl.textContent = '已自动布局，记得保存';
+}
+
+/* ---------- 加载 / 保存 ---------- */
+async function readDir(dir) {
+  const list = [];
+  for await (const [name, handle] of dir.entries()) {
+    if (handle.kind !== 'file' || !name.toLowerCase().endsWith('.json')) continue;
+    const text = await (await handle.getFile()).text();
+    try {
+      const data = JSON.parse(text);
+      list.push({ name, handle, data });
+    } catch (err) {
+      console.warn('skip', name, err);
+    }
+  }
+  return list;
+}
+
+function setFiles(list) {
+  files = list;
+  byId = new Map(files.map(f => [fileId(f), f]));
+  files.sort((a, b) => fileId(a).localeCompare(fileId(b)));
+  statusEl.textContent = `已加载 ${files.length} 个科技`;
+  if (files.length) select(files[0]);
+  draw();
+}
+
+$('btnOpen').onclick = async () => {
+  if (!window.showDirectoryPicker) { alert('当前浏览器不支持文件夹访问，请用「选择 JSON 文件」'); return; }
+  const dir = await window.showDirectoryPicker();
+  dirHandle = dir;
+  setFiles(await readDir(dir));
+};
+
+$('btnOpenFiles').onclick = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.multiple = true;
+  input.onchange = async () => {
+    const list = [];
+    for (const file of input.files) {
+      const text = await file.text();
+      try { list.push({ name: file.name, handle: null, data: JSON.parse(text) }); } catch (e) { console.warn(e); }
+    }
+    setFiles(list);
+  };
+  input.click();
+};
+
+function pretty(file) {
+  return JSON.stringify(file.data, null, 2) + '\n';
+}
+
+$('btnSave').onclick = async () => {
+  let saved = 0, skipped = 0;
+  for (const file of files) {
+    let handle = file.handle;
+    if (!handle && dirHandle) {
+      try { handle = await dirHandle.getFileHandle(file.name, { create: true }); file.handle = handle; } catch (e) { console.warn(e); }
+    }
+    if (handle) {
+      const writable = await handle.createWritable();
+      await writable.write(pretty(file));
+      await writable.close();
+      saved++;
+    } else {
+      skipped++;
+    }
+  }
+  statusEl.textContent = skipped
+    ? `已保存 ${saved} 个；${skipped} 个没有文件句柄，请用「导出全部」`
+    : `已保存 ${saved} 个科技`;
+};
+
+$('btnExport').onclick = () => {
+  for (const file of files) {
+    const blob = new Blob([pretty(file)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = file.name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  statusEl.textContent = '已导出，把文件放回 technologies 目录并 /reload';
+};
+
+$('btnNew').onclick = () => newTech();
+$('btnDel').onclick = () => deleteSelected();
+$('btnUndo').onclick = () => undo();
+$('btnRedo').onclick = () => redo();
+$('btnImport').onclick = () => importItems();
+$('btnLayout').onclick = autoLayout;
+
+$('fIcon').setAttribute('list', 'itemList');
+loadImportedItems();
+rebuildItemList();
+loadRecipes();
+rebuildRecipeList();
+for (const id of ['fTriggers', 'fShowWhen', 'fUnlocks', 'fWhitelist', 'fStructures', 'fEffects']) {
+  attachLineSuggest($(id));
+}
+resize();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "铁质工具",
+  "description": "铁镐咬进岩层的声音比木头沉得多。矿脉终于不再是墙，而是一扇半开的门。",
+  "icon": "minecraft:iron_pickaxe",
+  "category": "material",
+  "x": 0,
+  "y": -8,
+  "rounds": 12,
+  "prerequisites": [
+    "sciencepacks:red_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:iron_pickaxe",
+    "minecraft:iron_axe",
+    "minecraft:iron_shovel",
+    "minecraft:iron_hoe",
+    "minecraft:shears",
+    "minecraft:bucket",
+    "minecraft:flint_and_steel",
+    "minecraft:iron_bars",
+    "minecraft:iron_block",
+    "minecraft:iron_door",
+    "minecraft:iron_trapdoor",
+    "minecraft:cauldron"
+  ]
+}

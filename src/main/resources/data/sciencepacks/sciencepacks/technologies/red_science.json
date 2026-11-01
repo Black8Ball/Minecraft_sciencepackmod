@@ -1,0 +1,18 @@
+{
+  "name": "红色科技包",
+  "description": "把花瓣捣成红色染料，混进糖浆装进玻璃瓶——第一支红色研究包在微光中轻轻震颤。",
+  "icon": "sciencepacks:pack_red",
+  "category": "science",
+  "x": 0,
+  "y": -9,
+  "triggers": [
+    "minecraft:iron_ingot*4"
+  ],
+  "unlocks": [
+    "sciencepacks:pack_red"
+  ],
+  "cost": [],
+  "prerequisites": [
+    "sciencepacks:stone_age"
+  ]
+}

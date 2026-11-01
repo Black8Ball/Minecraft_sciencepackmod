@@ -1,0 +1,25 @@
+{
+  "name": "书与书架",
+  "description": "这些书全被你拿胶水粘一块了！你不知道你为什么需要这些纸砖头",
+  "icon": "minecraft:bookshelf",
+  "category": "material",
+  "x": 2,
+  "y": -8,
+  "rounds": 14,
+  "prerequisites": [
+    "sciencepacks:red_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:paper",
+    "minecraft:book",
+    "minecraft:bookshelf",
+    "minecraft:lectern",
+    "minecraft:chiseled_bookshelf"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.sciencepacks.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CraftingMenuMixin",
+    "InventoryMenuMixin",
+    "AbstractFurnaceBlockEntityMixin",
+    "BrewingStandBlockEntityMixin",
+    "FurnaceResultSlotMixin",
+    "SmithingMenuMixin",
+    "StonecutterMenuMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

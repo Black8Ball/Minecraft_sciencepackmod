@@ -1,0 +1,39 @@
+{
+  "name": "黄色科技包",
+  "description": "这底下为你提供了两种无限研究，我也不知道到有没有用",
+  "icon": "sciencepacks:pack_yellow",
+  "category": "science",
+  "x": 4,
+  "y": 2,
+  "researchTime": 100,
+  "rounds": 100,
+  "prerequisites": [
+    "sciencepacks:endgame"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 5
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 5
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 5
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 5
+    }
+  ],
+  "unlocks": [
+    "sciencepacks:pack_yellow"
+  ],
+  "showWhen": [
+    "pickup:minecraft:dragon_head*64",
+    "pickup:minecraft:sculk*16"
+  ],
+  "hidden": true
+}

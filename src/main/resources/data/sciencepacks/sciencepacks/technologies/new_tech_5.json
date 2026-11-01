@@ -1,0 +1,32 @@
+{
+  "name": "终极奉献",
+  "description": "有了新式合金，你终于可以把全世界变为耕地了",
+  "icon": "minecraft:netherite_hoe",
+  "x": 3,
+  "y": -1,
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 1
+    }
+  ],
+  "prerequisites": [
+    "sciencepacks:blue_science",
+    "sciencepacks:smithy"
+  ],
+  "rounds": 120,
+  "unlocks": [
+    "minecraft:netherite_axe",
+    "minecraft:netherite_hoe",
+    "minecraft:netherite_shovel",
+    "minecraft:netherite_pickaxe"
+  ]
+}

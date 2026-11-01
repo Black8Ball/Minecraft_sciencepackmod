@@ -1,0 +1,20 @@
+{
+  "name": "皮革护甲",
+  "description": "这些皮革让你有了一些想法，是时候把它们做成并不美丽的装备了",
+  "icon": "minecraft:leather_chestplate",
+  "x": 5,
+  "y": -9,
+  "cost": [],
+  "prerequisites": [
+    "sciencepacks:stone_age"
+  ],
+  "unlocks": [
+    "minecraft:leather_helmet",
+    "minecraft:leather_chestplate",
+    "minecraft:leather_leggings",
+    "minecraft:leather_boots"
+  ],
+  "triggers": [
+    "minecraft:leather*16"
+  ]
+}

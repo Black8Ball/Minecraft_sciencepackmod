@@ -1,0 +1,33 @@
+{
+  "name": "高级电路",
+  "description": "太好了，你终于拥有了原版游戏体验",
+  "icon": "minecraft:comparator",
+  "category": "redstone",
+  "x": 4,
+  "y": -1,
+  "researchTime": 60,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:blue_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:comparator",
+    "minecraft:observer",
+    "minecraft:daylight_detector",
+    "minecraft:heavy_weighted_pressure_plate",
+    "minecraft:light_weighted_pressure_plate",
+    "minecraft:redstone_lamp",
+    "minecraft:note_block",
+    "minecraft:target"
+  ]
+}

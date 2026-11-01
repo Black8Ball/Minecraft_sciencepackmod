@@ -1,0 +1,43 @@
+{
+  "name": "末地之门",
+  "description": "终于，通关近在眼前",
+  "icon": "minecraft:ender_eye",
+  "category": "dimension",
+  "x": 6,
+  "y": 0,
+  "researchTime": 60,
+  "rounds": 32,
+  "prerequisites": [
+    "sciencepacks:purple_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:ender_chest",
+    "minecraft:end_crystal",
+    "minecraft:shulker_box",
+    "minecraft:purpur_block",
+    "minecraft:purpur_pillar",
+    "minecraft:end_stone_bricks",
+    "minecraft:end_rod"
+  ],
+  "structures": [
+    "end_portal"
+  ]
+}

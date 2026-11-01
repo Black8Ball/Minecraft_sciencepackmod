@@ -1,0 +1,34 @@
+{
+  "name": "军工学 III",
+  "description": "",
+  "icon": "minecraft:diamond_chestplate",
+  "x": 1,
+  "y": -4,
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 2
+    }
+  ],
+  "prerequisites": [
+    "sciencepacks:archery",
+    "sciencepacks:diamond_tools",
+    "sciencepacks:green_science"
+  ],
+  "unlocks": [
+    "minecraft:diamond_sword",
+    "minecraft:diamond_helmet",
+    "minecraft:diamond_chestplate",
+    "minecraft:diamond_leggings",
+    "minecraft:diamond_boots"
+  ],
+  "rounds": 40
+}

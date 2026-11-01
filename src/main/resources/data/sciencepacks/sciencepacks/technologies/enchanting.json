@@ -1,0 +1,27 @@
+{
+  "name": "附魔学",
+  "description": "看着你闪闪发亮的钻石护甲，你开始想，如果它能更加发亮该多好……",
+  "icon": "minecraft:enchanting_table",
+  "category": "magic",
+  "x": 2,
+  "y": -3,
+  "researchTime": 80,
+  "rounds": 24,
+  "prerequisites": [
+    "sciencepacks:librarian",
+    "sciencepacks:new_tech_3"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:enchanting_table"
+  ]
+}

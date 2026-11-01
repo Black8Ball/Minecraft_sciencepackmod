@@ -1,0 +1,22 @@
+{
+  "name": "绿色科技包",
+  "description": "铁屑与萤石粉在瓶中相遇，绿色的微光像植物的汁液，缓慢地爬上瓶壁。",
+  "icon": "sciencepacks:pack_green",
+  "category": "science",
+  "x": 0,
+  "y": -5,
+  "rounds": 30,
+  "prerequisites": [
+    "sciencepacks:nether",
+    "sciencepacks:redstone_basics"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "sciencepacks:pack_green"
+  ]
+}

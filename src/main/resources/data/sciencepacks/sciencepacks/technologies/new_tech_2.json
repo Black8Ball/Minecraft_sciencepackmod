@@ -1,0 +1,26 @@
+{
+  "name": "矿车与铁轨",
+  "description": "铁轨……这只是基础版，至少你可以用那个熔炉矿车",
+  "icon": "minecraft:minecart",
+  "x": 0,
+  "y": -4,
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:minecart",
+    "minecraft:furnace_minecart",
+    "minecraft:rail"
+  ],
+  "prerequisites": [
+    "sciencepacks:green_science"
+  ],
+  "rounds": 60
+}

@@ -1,0 +1,33 @@
+{
+  "name": "金工技艺",
+  "description": "你觉得你穿上这些金制品就可以让猪人把你当成好朋友，他们没什么脑子可言，对吧",
+  "icon": "minecraft:golden_sword",
+  "category": "material",
+  "x": -4,
+  "y": -5,
+  "rounds": 16,
+  "triggers": [
+    "minecraft:gold_ingot*4"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:golden_pickaxe",
+    "minecraft:golden_axe",
+    "minecraft:golden_shovel",
+    "minecraft:golden_hoe",
+    "minecraft:golden_sword",
+    "minecraft:golden_helmet",
+    "minecraft:golden_chestplate",
+    "minecraft:golden_leggings",
+    "minecraft:golden_boots",
+    "minecraft:gold_block"
+  ],
+  "prerequisites": [
+    "sciencepacks:nether"
+  ]
+}

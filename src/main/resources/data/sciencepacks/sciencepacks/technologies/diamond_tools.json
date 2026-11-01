@@ -1,0 +1,29 @@
+{
+  "name": "钻石工具",
+  "description": "并不能切割玻璃",
+  "icon": "minecraft:diamond_pickaxe",
+  "category": "equipment",
+  "x": 1,
+  "y": -6,
+  "rounds": 32,
+  "prerequisites": [
+    "sciencepacks:iron_tools"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:diamond_pickaxe",
+    "minecraft:diamond_axe",
+    "minecraft:diamond_shovel",
+    "minecraft:diamond_hoe",
+    "minecraft:diamond_block"
+  ]
+}

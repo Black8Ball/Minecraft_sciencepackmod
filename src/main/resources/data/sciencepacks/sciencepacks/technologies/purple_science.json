@@ -1,0 +1,26 @@
+{
+  "name": "紫色科技包",
+  "description": "末影珍珠的裂隙里渗出紫色的雾，烈焰粉在雾中明明灭灭——像一颗不肯熄灭的星。",
+  "icon": "sciencepacks:pack_purple",
+  "category": "science",
+  "x": 6,
+  "y": -1,
+  "researchTime": 60,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:blue_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 5
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 3
+    }
+  ],
+  "unlocks": [
+    "sciencepacks:pack_purple"
+  ]
+}

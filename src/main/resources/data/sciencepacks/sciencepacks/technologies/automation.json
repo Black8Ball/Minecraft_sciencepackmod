@@ -1,0 +1,32 @@
+{
+  "name": "红石自动化",
+  "description": "终于可以自动制作科技包了，摆脱灰头土脸的生活吧",
+  "icon": "minecraft:crafter",
+  "category": "logistics",
+  "x": 5,
+  "y": -1,
+  "researchTime": 100,
+  "rounds": 30,
+  "prerequisites": [
+    "sciencepacks:blue_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:crafter",
+    "minecraft:dispenser",
+    "minecraft:dropper"
+  ]
+}

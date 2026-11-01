@@ -1,0 +1,24 @@
+{
+  "name": "石器时代",
+  "description": "你的开始",
+  "icon": "minecraft:stone_pickaxe",
+  "category": "material",
+  "x": -2,
+  "y": -11,
+  "triggers": [
+    "minecraft:cobblestone*16"
+  ],
+  "unlocks": [
+    "minecraft:stone_pickaxe",
+    "minecraft:stone_axe",
+    "minecraft:stone_shovel",
+    "minecraft:stone_hoe",
+    "minecraft:stone_sword",
+    "minecraft:furnace",
+    "minecraft:stonecutter",
+    "minecraft:campfire",
+    "minecraft:torch"
+  ],
+  "cost": [],
+  "root": true
+}

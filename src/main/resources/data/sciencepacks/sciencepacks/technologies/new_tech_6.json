@@ -1,0 +1,32 @@
+{
+  "name": "高级铁轨系统",
+  "description": "终于！很快的矿车！",
+  "icon": "minecraft:powered_rail",
+  "x": 0,
+  "y": -1,
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 3
+    }
+  ],
+  "prerequisites": [
+    "sciencepacks:blue_science",
+    "sciencepacks:new_tech_2",
+    "sciencepacks:gold_craft"
+  ],
+  "unlocks": [
+    "minecraft:powered_rail",
+    "minecraft:detector_rail",
+    "minecraft:activator_rail"
+  ],
+  "rounds": 30
+}

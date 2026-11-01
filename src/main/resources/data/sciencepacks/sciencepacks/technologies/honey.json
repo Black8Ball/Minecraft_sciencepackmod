@@ -1,0 +1,24 @@
+{
+  "name": "养蜂",
+  "description": "木箱挂在花丛边，蜜蜂把它当作家。蜂蜜缓慢滴落，甜得像一种奢侈。",
+  "icon": "minecraft:beehive",
+  "category": "material",
+  "x": -2,
+  "y": -8,
+  "rounds": 12,
+  "prerequisites": [
+    "sciencepacks:red_science",
+    "sciencepacks:farming"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:beehive",
+    "minecraft:honey_block",
+    "minecraft:honeycomb_block"
+  ]
+}

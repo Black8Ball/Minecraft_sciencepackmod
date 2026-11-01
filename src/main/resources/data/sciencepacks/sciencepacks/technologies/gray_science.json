@@ -1,0 +1,22 @@
+{
+  "name": "灰色科技包",
+  "description": "外面都是僵尸，你需要武器保护自己，这将成为你武器研究的基石",
+  "icon": "sciencepacks:pack_gray",
+  "category": "science",
+  "x": 4,
+  "y": -8,
+  "researchTime": 20,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:red_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "sciencepacks:pack_gray"
+  ]
+}

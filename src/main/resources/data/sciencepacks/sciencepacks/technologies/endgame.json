@@ -1,0 +1,42 @@
+{
+  "name": "终局科技",
+  "description": "我累了，杀龙也好，打水晶也好……",
+  "icon": "minecraft:beacon",
+  "category": "endgame",
+  "x": 4,
+  "y": 1,
+  "researchTime": 60,
+  "rounds": 40,
+  "prerequisites": [
+    "sciencepacks:new_tech_4",
+    "sciencepacks:the_end"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 4
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 4
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 4
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 4
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 4
+    }
+  ],
+  "unlocks": [
+    "minecraft:beacon",
+    "minecraft:conduit",
+    "minecraft:respawn_anchor",
+    "minecraft:mace"
+  ]
+}

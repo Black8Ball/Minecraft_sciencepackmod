@@ -1,0 +1,29 @@
+{
+  "name": "酿造工艺",
+  "description": "酿造台冒着泡，烈焰粉让药水翻滚出橙色。痛苦、失明与剧毒，都可以被调配。",
+  "icon": "minecraft:brewing_stand",
+  "category": "magic",
+  "x": -3,
+  "y": -5,
+  "rounds": 18,
+  "prerequisites": [
+    "sciencepacks:nether"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:brewing_stand",
+    "minecraft:blaze_powder",
+    "minecraft:magma_cream",
+    "minecraft:glistering_melon_slice",
+    "minecraft:golden_apple"
+  ]
+}

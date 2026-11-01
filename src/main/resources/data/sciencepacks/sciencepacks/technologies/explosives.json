@@ -1,0 +1,25 @@
+{
+  "name": "爆破工程",
+  "description": "炸弹！",
+  "icon": "minecraft:tnt",
+  "category": "military",
+  "x": 6,
+  "y": -5,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:archery"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:tnt"
+  ]
+}

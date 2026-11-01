@@ -1,0 +1,32 @@
+{
+  "name": "轨道物流",
+  "description": "你仍然无法参悟动力铁轨的精神，但你研究出了这些物流矿车，至少可以给你一些慰藉，或者把它们全炸了",
+  "icon": "minecraft:chest_minecart",
+  "category": "logistics",
+  "x": -1,
+  "y": -3,
+  "researchTime": 60,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:logistics_1",
+    "sciencepacks:new_tech_2"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:chest_minecart",
+    "minecraft:hopper_minecart",
+    "minecraft:tnt_minecart"
+  ],
+  "excludes": [
+    "sciencepacks:create_logistics"
+  ]
+}

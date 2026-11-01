@@ -1,0 +1,23 @@
+{
+  "mods": ["create"],
+  "remove": [],
+  "recipes": [
+    {
+      "id": "sciencepacks:pack_green",
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "category": "misc",
+        "ingredients": [
+          { "item": "minecraft:glass_bottle" },
+          { "item": "create:andesite_alloy" },
+          { "item": "minecraft:glowstone_dust" },
+          { "item": "minecraft:sugar" }
+        ],
+        "result": {
+          "id": "sciencepacks:pack_green",
+          "count": 2
+        }
+      }
+    }
+  ]
+}

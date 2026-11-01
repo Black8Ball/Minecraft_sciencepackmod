@@ -1,0 +1,37 @@
+{
+  "name": "军工学 IV",
+  "description": "你的闪亮钻石甲虽然不再闪亮了，但是你拥有了酷炫黑金装甲！",
+  "icon": "minecraft:netherite_chestplate",
+  "x": 1,
+  "y": 0,
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_gray",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:netherite_sword",
+    "minecraft:netherite_helmet",
+    "minecraft:netherite_chestplate",
+    "minecraft:netherite_leggings",
+    "minecraft:netherite_boots"
+  ],
+  "prerequisites": [
+    "sciencepacks:new_tech_3",
+    "sciencepacks:new_tech_5"
+  ],
+  "rounds": 100
+}

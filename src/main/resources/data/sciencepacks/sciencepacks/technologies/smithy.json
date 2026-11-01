@@ -1,0 +1,29 @@
+{
+  "name": "铁匠铺",
+  "description": "铁砧立起来，风箱呼哧作响。锻造台旁堆着第一批被烧红的失败品。",
+  "icon": "minecraft:anvil",
+  "category": "material",
+  "x": -6,
+  "y": -6,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:iron_tools"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:anvil",
+    "minecraft:smithing_table",
+    "minecraft:grindstone",
+    "minecraft:blast_furnace",
+    "minecraft:smoker"
+  ]
+}

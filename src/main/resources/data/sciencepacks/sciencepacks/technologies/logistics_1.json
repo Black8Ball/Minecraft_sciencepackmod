@@ -1,0 +1,21 @@
+{
+  "name": "基础物流",
+  "description": "我们总是想要更多漏斗",
+  "icon": "minecraft:hopper",
+  "category": "logistics",
+  "x": -2,
+  "y": -4,
+  "rounds": 16,
+  "prerequisites": [
+    "sciencepacks:green_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:hopper"
+  ]
+}

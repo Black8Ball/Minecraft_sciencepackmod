@@ -1,0 +1,29 @@
+{
+  "name": "制图与计时",
+  "description": "也许那些纸和金子真的有点用",
+  "icon": "minecraft:clock",
+  "category": "material",
+  "x": 3,
+  "y": -4,
+  "rounds": 16,
+  "prerequisites": [
+    "sciencepacks:gold_craft",
+    "sciencepacks:librarian"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:map",
+    "minecraft:compass",
+    "minecraft:clock",
+    "minecraft:recovery_compass"
+  ]
+}

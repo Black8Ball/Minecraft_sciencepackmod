@@ -1,0 +1,33 @@
+{
+  "name": "下界合金",
+  "description": "你把你从下界挖到的那些可疑的残骸和你家里富裕的那堆没用的金子放到一起，用你几万吨的巨力像玩泥巴一样捏了两下，一种新型合金展现在你面前",
+  "icon": "minecraft:netherite_ingot",
+  "category": "equipment",
+  "x": -5,
+  "y": -5,
+  "researchTime": 90,
+  "rounds": 30,
+  "prerequisites": [
+    "sciencepacks:diamond_tools",
+    "sciencepacks:nether"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_blue",
+      "count": 2
+    },
+    {
+      "item": "sciencepacks:pack_purple",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:netherite_block",
+    "minecraft:lodestone",
+    "minecraft:netherite_ingot"
+  ]
+}

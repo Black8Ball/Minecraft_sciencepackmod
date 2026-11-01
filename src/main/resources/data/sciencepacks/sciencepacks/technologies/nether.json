@@ -1,0 +1,33 @@
+{
+  "name": "下界通行",
+  "description": "黑曜石框里腾起紫烟。门后不是矿洞，是另一个世界的呼吸声——热、腥、带着硫磺味。",
+  "icon": "minecraft:flint_and_steel",
+  "category": "dimension",
+  "x": -4,
+  "y": -6,
+  "researchTime": 80,
+  "rounds": 24,
+  "prerequisites": [
+    "sciencepacks:iron_tools"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:nether_bricks",
+    "minecraft:nether_brick_fence",
+    "minecraft:quartz_block",
+    "minecraft:glowstone",
+    "minecraft:soul_torch",
+    "minecraft:soul_lantern",
+    "minecraft:lantern",
+    "minecraft:chain",
+    "minecraft:magma_block"
+  ],
+  "structures": [
+    "nether_portal"
+  ]
+}

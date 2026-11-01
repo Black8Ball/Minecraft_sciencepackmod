@@ -1,0 +1,26 @@
+{
+  "name": "蓝色科技包",
+  "description": "钻石的冷光透过瓶壁，青金石沉淀成深蓝的星屑，在液面下缓慢旋转。",
+  "icon": "sciencepacks:pack_blue",
+  "category": "science",
+  "x": 3,
+  "y": -2,
+  "researchTime": 40,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:green_science"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 3
+    },
+    {
+      "item": "sciencepacks:pack_green",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "sciencepacks:pack_blue"
+  ]
+}

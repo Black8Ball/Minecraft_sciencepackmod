@@ -1,0 +1,28 @@
+{
+  "name": "基础红石电路",
+  "description": "逻辑电路，哦耶",
+  "icon": "minecraft:repeater",
+  "category": "redstone",
+  "x": 0,
+  "y": -6,
+  "rounds": 20,
+  "prerequisites": [
+    "sciencepacks:iron_tools"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 2
+    }
+  ],
+  "unlocks": [
+    "minecraft:redstone_torch",
+    "minecraft:repeater",
+    "minecraft:lever",
+    "minecraft:stone_button",
+    "minecraft:stone_pressure_plate",
+    "minecraft:piston",
+    "minecraft:sticky_piston",
+    "minecraft:redstone_block"
+  ]
+}

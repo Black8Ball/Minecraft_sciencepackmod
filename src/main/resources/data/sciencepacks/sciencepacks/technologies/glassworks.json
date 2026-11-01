@@ -1,0 +1,23 @@
+{
+  "name": "玻璃工坊",
+  "description": "沙子熔成透明的薄片。第一次，墙外的风景可以透过墙照进来。",
+  "icon": "minecraft:glass",
+  "category": "building",
+  "x": 3,
+  "y": -7,
+  "rounds": 12,
+  "prerequisites": [
+    "sciencepacks:masonry"
+  ],
+  "cost": [
+    {
+      "item": "sciencepacks:pack_red",
+      "count": 1
+    }
+  ],
+  "unlocks": [
+    "minecraft:glass",
+    "minecraft:glass_pane",
+    "minecraft:tinted_glass"
+  ]
+}
